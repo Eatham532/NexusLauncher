@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "piston-lib",
+    "nexus-launcher/src-tauri"
+]
+
+
+[profile.release]
+debug = true
