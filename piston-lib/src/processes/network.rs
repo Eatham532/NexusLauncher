@@ -43,11 +43,11 @@ pub async fn read_from_uri(uri:&str, sha1: Option<&str>) -> Result<Bytes, Box<dy
                     continue;
                 }
 
-                println!("Verifying hash");
                 let bytes = x.bytes().await;
 
                 if let Ok(bytes) = bytes {
                     if let Some(sha1) = sha1 {
+                        println!("Verifying hash");
                         if &*get_hash(bytes.clone()).await.unwrap() != sha1 {
                             if attempt <= 3 {
                                 continue;

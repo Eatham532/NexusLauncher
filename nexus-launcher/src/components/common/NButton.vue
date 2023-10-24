@@ -15,7 +15,15 @@
     outline: {
       type: Boolean,
       default: false,
-    }
+    },
+    transparent: {
+      type: Boolean,
+      default: false,
+    },
+    square: {
+      type: Boolean,
+      default: false,
+    },
   })
 </script>
 
@@ -24,6 +32,8 @@
     'expand': props.expand,
     'use_padding': props.use_padding,
     'outline': props.outline,
+    'transparent': props.transparent,
+    'square': props.square,
   }
 "
   :disabled="disabled">
@@ -37,7 +47,7 @@
     background-color: #0066CC;
     box-shadow: var(--gray-900) 0px 0px 0px 0px;
     border-radius: 10px;
-    transition : 300ms;
+    transition : 200ms;
     transform: translateY(0);
     display: flex;
     flex-direction: row;
@@ -47,23 +57,40 @@
     user-select: none;
 
     &:hover {
-      background-color: #fff;
+      background-color: #aec5d2;
       color: #0066cc;
+      box-shadow: #002554 1px 1px 2px;
     }
   }
 
   .expand:hover {
     transition : 500ms;
     transform : translateY(-0px);
-    padding: 10px 10px;
 
     &:is(.use_padding) {
-      padding: 10px 30px;
+      &:is(.square) {
+        padding: 10px 25px;
+      }
+      &:not(.square) {
+        padding: 10px 30px;
+      }
+    }
+
+    &:is(.square) {
+      padding: 5px 10px;
+    }
+    &:not(.square) {
+      padding: 10px 10px;
     }
   }
 
   .use_padding {
-    padding: 10px 20px;
+    &:is(.square) {
+      padding: 10px 15px;
+    }
+    &:not(.square) {
+      padding: 10px 20px;
+    }
   }
 
   .outline {
@@ -91,6 +118,16 @@
 
     &:is(.use_padding) {
       padding: 10px 20px!important;
+    }
+  }
+
+  .transparent {
+    background-color: transparent!important;
+    color: var(--gray-900);
+
+    &:hover {
+      color: white!important;
+      background-color: #0066cc!important;
     }
   }
 </style>

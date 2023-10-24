@@ -1,18 +1,14 @@
 <!--
-
-TODO: PROGRESS IS BUGGED
-NOTE: Maybe add an emit to the InstanceViewer to tell it to refresh instead of reloading window
-Note: Ask discord about the progress bug
-
 TODO: FIX SERIALISATION RENAME OF SPECTA
 
 -->
 
 <script setup lang="ts">
 
-import {NexusInstance} from "../../config.ts";
+import {NexusInstance, launchInstance} from "../../scripts/rust/instances.ts";
 import {listen} from "@tauri-apps/api/event";
 import {ref} from "vue";
+import NButton from "../common/NButton.vue";
 
 const props = defineProps({
   instance: {
@@ -33,20 +29,20 @@ const props = defineProps({
 
 console.log(props.instance);
 
-let progress = ref('0');
+let progress = ref(0);
 
 interface ProgressPayload {
   id: string,
-  progress: string,
+  progress: number,
   message: string,
 }
 
 if (props.instance != undefined) {
   if (props.instance.install_stage === 'Installed') {
-    progress.value = '100';
+    progress.value = 100;
   }
   else if (props.instance.install_stage === 'Installing') {
-    progress.value = '1';
+    progress.value = 1;
   }
 }
 
@@ -59,22 +55,31 @@ listen<ProgressPayload>('game-install-progress', (event) => {
     }
   }
 });
+
+function launchInstanceClick() {
+  if (props.instance != undefined) {
+    if (props.instance.install_stage == "Installed") {
+      console.log("Launching Game...")
+      launchInstance(props.instance);
+    }
+  }
+}
 </script>
 
 <template>
   <div ref="btn" :class="{
     root: true,
-    none: progress === '0',
-    installed: progress === '100',
+    none: progress === 0,
+    installed: progress >= 100,
   }" @click="$emit('click')">
     <div class="spacer"></div>
     <div class="BtnContent">
       <div class="InstanceName"><p>{{ instance.name }}</p></div>
       <div class="bottom-section">
         <div class="BtnDiv">
-          <button class="PlayButton">
-
-          </button>
+          <NButton class="PlayButton" @click="launchInstanceClick" :disabled="progress != 100">
+            Play
+          </NButton>
         </div>
         <div class="StatsText">
           <p>{{ instance.modloader }}</p>
@@ -96,6 +101,7 @@ listen<ProgressPayload>('game-install-progress', (event) => {
     width: 200px;
     vertical-align: top;
     overflow: hidden;
+    box-shadow: var(--primary-900) 2px 2px 2px;
 
     & .spacer {
       height: 40px
@@ -112,6 +118,7 @@ listen<ProgressPayload>('game-install-progress', (event) => {
 
       & .InstanceName {
         font-size: 20px;
+        overflow: hidden;
       }
 
       & .bottom-section {
@@ -129,9 +136,14 @@ listen<ProgressPayload>('game-install-progress', (event) => {
             width: 35px;
             height: 35px;
             aspect-ratio: 1;
-            background-color: var(--secondary-400);
 
-            &:hover {
+
+            &:enabled {
+              cursor: pointer;
+              background-color: var(--secondary-400);
+            }
+
+            &:disabled {
               background-color: var(--secondary-200);
             }
           }
@@ -142,10 +154,11 @@ listen<ProgressPayload>('game-install-progress', (event) => {
         }
       }
     }
-  }
 
-  .rootHover {
-    background-color: var(--primary-700);
+    &:hover {
+      background-color: var(--primary-700);
+      box-shadow: var(--primary-900) 3px 3px 2px;
+    }
   }
 
   .none {

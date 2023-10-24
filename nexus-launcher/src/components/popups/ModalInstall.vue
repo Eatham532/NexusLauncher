@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {Ref, ref} from "vue";
   import NButton from "../common/NButton.vue";
-  import {getVersions, installInstance, Version, VersionManifestRoot} from "../../bindings.ts";
+  import {getVersions, installInstance, Version, VersionManifestRoot} from "../../scripts/rust/instances.ts";
   import {pick_folder} from "../../scripts/fs.ts";
   import {message} from "@tauri-apps/api/dialog"
   import {v1 as uuidV1} from "uuid";
-import {getAppConfig} from "../../config.ts";
+import {getAppConfig} from "../../scripts/rust/config.ts";
 import {path} from "@tauri-apps/api";
 
   const emit = defineEmits(['close']);

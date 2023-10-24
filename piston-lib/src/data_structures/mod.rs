@@ -1,2 +1,2 @@
 pub mod game;
-mod client;
+pub mod client;

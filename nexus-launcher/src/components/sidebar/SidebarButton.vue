@@ -8,24 +8,28 @@ const handleClick = () => {
 
 <template>
   <button @click="handleClick">
-    <slot></slot>
+    <slot class="slot"></slot>
   </button>
 </template>
 
 <style scoped>
 button {
+  display: flex;
+  justify-content: center;
+  justify-self: center;
   border: none;
   background: none;
-  padding: 5px;
   aspect-ratio: 1;
   border-radius: 20px;
   margin: 0 10px;
+  align-items: center;
 }
 
 button:hover {
   cursor: pointer;
   background: rgba(117, 99, 99, 0.3);
   transition: all 0.5s ease;
+  transform: scale(1.05);
 }
 
 </style>

@@ -11,6 +11,20 @@ declare global {
 const invoke = () => window.__TAURI_INVOKE__;
 
 /**
+ * Get the data from instances.toml
+ */
+export function getInstancesToml() {
+    return invoke()<InstancesToml>("get_instances_toml")
+}
+
+/**
+ * Write instances data to instances.toml
+ */
+export function writeInstanceToml(config: InstancesToml) {
+    return invoke()<null>("write_instance_toml", { config })
+}
+
+/**
  * Adds an instance to the installation queue
  */
 export function installInstance(instance: NexusInstance) {
@@ -24,9 +38,17 @@ export function getVersions() {
     return invoke()<VersionManifestRoot>("get_versions")
 }
 
+/**
+ * Launch an instance
+ */
+export function launchInstance(instance: NexusInstance) {
+    return invoke()<null>("launch_instance", { instance })
+}
+
 export type Modloader = "Vanilla" | "Fabric" | "Forge" | "Quilt"
-export type NexusInstance = { id: string; install_stage: InstanceInstallStage; name: string; game_version: string; modloader: Modloader; loader_version: string | null; path: string }
+export type InstancesToml = { Instance: NexusInstance[] }
 export type InstanceInstallStage = "Installed" | "Installing" | "Cancelled" | "None"
 export type Latest = { release: string; snapshot: string }
 export type VersionManifestRoot = { latest: Latest; versions: Version[] }
+export type NexusInstance = { id: string; install_stage: InstanceInstallStage; name: string; game_version: string; modloader: Modloader; loader_version: string | null; path: string }
 export type Version = { id: string; type: string; url: string; time: string; releaseTime: string; sha1: string; complianceLevel: number }
