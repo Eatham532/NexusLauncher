@@ -5,7 +5,7 @@ import NButton from "../common/NButton.vue";
 import {Ref, ref} from "vue";
 import {pick_folder} from "../../scripts/fs.ts";
 import {animate} from "../../scripts/utils.ts";
-import {writeAppConfig, AppConfig, getAppConfig} from "../../config.ts";
+import {writeAppConfig, AppConfig, getAppConfig} from "../../scripts/rust/config.ts";
 import {ask} from "@tauri-apps/api/dialog";
 
 const emit = defineEmits(['close']);

@@ -5,14 +5,14 @@
 import {appWindow} from "@tauri-apps/api/window"
 import ProfileButton from "./components/sidebar/ProfileButton.vue";
 import SidebarButton from "./components/sidebar/SidebarButton.vue";
-import {markRaw} from "vue";
+import {markRaw, ref} from "vue";
 import ModalInstall from "./components/popups/ModalInstall.vue";
 import ModalSettings from "./components/popups/ModalSettings.vue";
 import {useModal} from "./composables/useModal.ts";
 import InstanceViewer from "./components/instance_management/InstanceViewer.vue";
 import NButton from "./components/common/NButton.vue";
 import NotificationMenu from "./components/NotificationMenu.vue";
-import NChip from "./components/common/NChip.vue";
+import ModalAccount from "./components/popups/ModalAccount.vue";
 
 appWindow.theme().then((theme) => {
   if (theme != null) {
@@ -20,7 +20,6 @@ appWindow.theme().then((theme) => {
     console.log(document.documentElement.getAttribute('data-theme'));
   }
 })
-
 
 
 
@@ -38,6 +37,12 @@ const openSettings = () => {
   modal.showModal();
 };
 
+const openAddAcc = () => {
+  console.log("Open");
+  modal.component.value = markRaw(ModalAccount);
+  modal.showModal();
+}
+
 
 appWindow.show();
 appWindow.setFocus();
@@ -54,7 +59,7 @@ appWindow.setFocus();
     <div id="sidebar">
       <div id="sidebar-base">
         <div id="sidebar-top">
-          <ProfileButton id="AccountView" tabindex="0"/>
+          <ProfileButton id="AccountView" tabindex="0" @addAccount="openAddAcc"/>
           <div id="sidebar-actions">
             <!-- Add New Instance-->
             <SidebarButton class="sidebarBtn" @click="openInstall" tabindex="0">
@@ -136,7 +141,7 @@ appWindow.setFocus();
     }
 
     & #sidebar-base {
-      box-shadow: var(--gray-800) 10px 8px;
+      box-shadow: var(--gray-800) 6px 6px 4px;
       border-radius: 30px;
       background: var(--secondary-400);
 

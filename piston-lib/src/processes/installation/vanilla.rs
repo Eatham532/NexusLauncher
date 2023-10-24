@@ -1,9 +1,12 @@
 use std::{env, fs};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use reqwest::{Client, Response};
+use serde::{Deserialize, Serialize};
 use crate::data_structures::game::mojang_version_manifest::{Version, VersionManifestRoot};
-use crate::data_structures::game::version::{DownloadType, game_version, Library};
+use crate::data_structures::game::version::{DownloadType, game_version, Library, Rule, RuleAction};
 use crate::processes::fs::verify_dir;
+use crate::processes::launcher::args::check_rules;
 use crate::processes::network::{download_from_uri, unzip_from_uri};
 
 pub async fn get_version_manifest() -> Result<VersionManifestRoot, reqwest::Error> {
@@ -45,12 +48,18 @@ pub async fn download_client_json(version_id: &str, versions_dir: &PathBuf) -> R
 pub async fn get_version_info(version_id: &str, versions_dir: &PathBuf) -> Result<game_version, ()> {
     let version_json_path = versions_dir.join(version_id).join(format!("{}.json", version_id));
 
-    // Read the file
-    let contents : String = fs::read_to_string(version_json_path).unwrap();
-    // Deserialize the file
-    let result : game_version = serde_json::from_str(&contents).unwrap();
-
-    Ok(result)
+    if version_json_path.exists() {
+        // Read the file
+        let contents : String = fs::read_to_string(version_json_path).unwrap();
+        // Deserialize the file
+        let result : game_version = serde_json::from_str(&contents).unwrap();
+        return Ok(result);
+    }
+    else {
+        println!("Err! version.json does not exist!");
+        println!("Path: {:?}", version_json_path);
+        return Err(());
+    }
 }
 
 pub async fn download_client_jar(version: &game_version, path: &PathBuf) {
@@ -67,12 +76,27 @@ pub async fn download_libraries(lib_dir: &PathBuf, natives_dir: &PathBuf, librar
     verify_dir(&natives_dir).await;
     verify_dir(&lib_dir).await;
     for library in libraries {
+        // Check if the rule allows the library to be downloaded
+        if library.rules.is_some() {
+            if check_rules(library.rules.unwrap()) == false {
+                continue;
+            }
+        }
+
+
         for download in library.downloads {
-            for file in download.artifact {
-                download_from_uri(&file.url, &lib_dir.join(&file.path.unwrap()), Some(&file.sha1), false).await.expect("TODO: panic message");
+            if let Some(artifact) = download.artifact {
+                download_from_uri(&artifact.url, &lib_dir.join(&artifact.path.unwrap()), Some(&artifact.sha1), false).await.expect("TODO: panic message");
+            }
+            else {
+                if let Some(url) = &library.url {
+                    download_from_uri(url, &lib_dir.join(&library.name), None, false).await.expect("TODO: panic message");
+                }
             }
 
-            if Some(&download.classifiers).is_some() {
+
+            // Classifiers are used for old versions
+            if download.classifiers.is_some() {
                 let current_native = get_current_native();
 
                 for classifier in download.classifiers {
@@ -83,8 +107,8 @@ pub async fn download_libraries(lib_dir: &PathBuf, natives_dir: &PathBuf, librar
 */
                             match unzip_from_uri(&x.1.url, natives_dir, Some(&x.1.sha1), false).await
                             {
-                                Ok(()) => println!("Unzip successful"),
-                                Err(e) => eprintln!("Error: {}", e),
+                                Ok(()) => {},
+                                Err(e) => eprintln!("Error unzipping: {}", e),
                             }
                         }
                         else {
@@ -94,6 +118,33 @@ pub async fn download_libraries(lib_dir: &PathBuf, natives_dir: &PathBuf, librar
                 }
             }
         }
+    }
+}
+
+
+#[derive(Serialize, Deserialize)]
+pub struct AssetIndex {
+    objects: HashMap<String, Object>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Object {
+    hash: String,
+    size: i32,
+}
+
+pub async fn download_asset_objects(index: AssetIndex, assets_path: &PathBuf) {
+    let path = assets_path.join("objects");
+    for asset in index.objects {
+        let download_path = path.join(&asset.1.hash[..2]).join(&asset.1.hash);
+        match download_from_uri(&*format!("https://resources.download.minecraft.net/{}/{}", &asset.1.hash[..2], &asset.1.hash), &download_path, Some(&asset.1.hash), false).await {
+            Ok(result) => {
+                println!("Downloaded asset successfully to {:?}", download_path);
+            }
+            Err(e) => {
+                eprintln!("ERROR! {}", e)
+            }
+        };
     }
 }
 

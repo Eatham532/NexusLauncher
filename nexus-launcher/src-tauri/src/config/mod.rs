@@ -2,27 +2,32 @@
 // There is the app config which will store the config with the directory to a custom config.
 // This will let the user have more options where things are stored
 
-pub mod structs;
+
+pub mod config;
+pub mod instance;
+pub mod user;
 
 use std::fs;
+use std::fs::create_dir_all;
 use std::path::PathBuf;
 use tauri::api::path;
-use crate::config::structs::config::AppConfig;
-use crate::config::structs::instances::InstancesToml;
+use crate::config::config::AppConfig;
+use crate::config::instance::InstancesToml;
+use crate::config::user::config::UsersJson;
+use crate::config::user::NexusUser;
 
 /// Gets the path of the directory which contains the app configurations
 #[tauri::command]
 #[specta::specta]
-pub fn get_app_config_dir_path() -> PathBuf {
+pub fn get_appdata_dir_path() -> PathBuf {
     path::config_dir().unwrap().join("NexusLauncher")
 }
 
 
 
-
 /// Gets the path of the app config.toml
 fn get_app_config_path() -> PathBuf {
-    get_app_config_dir_path().join("config.toml")
+    get_appdata_dir_path().join("config.toml")
 }
 
 /// Gets the data from config.toml
@@ -33,18 +38,8 @@ pub fn get_app_config() -> AppConfig {
 
     if !p.exists() {
         // Create file with default settings
-        if let Ok(toml_string) = toml::to_string(&AppConfig::default()) {
-            return match fs::write(&p, toml_string) {
-                Ok(_) => {
-                    println!("Created `config.toml` with default settings!");
-                    AppConfig::default()
-                }
-                Err(e) => {
-                    eprintln!("Failed to create `config.toml`! {e}");
-                    AppConfig::default()
-                }
-            };
-        }
+        create_dir_all(get_appdata_dir_path().join("cache")).expect("Failed to create appdata directory");
+        write_app_config(AppConfig::default());
     }
 
     match std::fs::read_to_string(p) {
@@ -71,9 +66,10 @@ pub fn write_app_config(config: AppConfig) {
 
 
 
+
 /// Get the path of the instances.toml
 fn get_instances_toml_path() -> PathBuf {
-    get_app_config_dir_path().join("instances.toml")
+    get_appdata_dir_path().join("instances.toml")
 }
 
 /// Get the data from instances.toml
@@ -112,4 +108,55 @@ pub fn write_instance_toml(config: InstancesToml) {
             eprintln!("Failed to convert config to Toml: {e}");
         }
     }
+}
+
+
+
+/// Get cache path
+pub fn get_cache_path() -> PathBuf {
+    get_appdata_dir_path().join("cache")
+}
+
+
+/// get the users.json
+#[tauri::command]
+#[specta::specta]
+pub fn get_users() -> UsersJson {
+    let p = get_cache_path().join("users.json");
+
+    if !p.exists() {
+        // Create file with default settings
+
+        write_users_json(UsersJson::default());
+    }
+
+    match std::fs::read_to_string(p) {
+        Ok(v) => serde_json::from_str(&v).unwrap(),
+        Err(_) => UsersJson::default(),
+    }
+}
+
+fn write_users_json(config: UsersJson) {
+    let p = get_cache_path().join("users.json");
+
+    match serde_json::to_string(&config) {
+        Ok(json_string) => {
+            match std::fs::write(p, json_string) {
+                Ok(_) => {}
+                Err(e) => {
+                    eprintln!("Failed to write config file: {e}");
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to convert config to Json: {e}");
+        }
+    }
+}
+
+pub fn add_user(user: NexusUser) {
+    let mut users = get_users();
+    users.active = Some(user.uuid.clone());
+    users.users.insert(user.uuid.clone(), user);
+    write_users_json(users);
 }

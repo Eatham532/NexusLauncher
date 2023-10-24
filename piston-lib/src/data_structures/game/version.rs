@@ -5,13 +5,15 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt;
+use std::fs::read_to_string;
 use std::path::PathBuf;
 
 #[cfg(feature = "bincode")]
 use bincode::{Decode, Encode};
 use crate::data_structures::game::modded::{Processor, SidedDataEntry};
-use crate::processes::installation::HandleProgress;
-use crate::processes::installation::vanilla::{download_client_jar, download_libraries};
+use crate::processes::installation::{HandleProgress, vanilla};
+use crate::processes::installation::vanilla::{download_asset_objects, download_client_jar, download_libraries};
 use crate::processes::network::{download_from_uri};
 
 #[cfg_attr(feature = "bincode", derive(Encode, Decode))]
@@ -193,6 +195,13 @@ pub enum Os {
     LinuxArm32,
     /// The OS is unknown
     Unknown,
+}
+
+impl fmt::Display for Os {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let value = format!("{:?}", self).to_lowercase();
+        write!(f, "{}", value)
+    }
 }
 
 #[cfg_attr(feature = "bincode", derive(Encode, Decode))]
@@ -431,7 +440,20 @@ impl game_version {
         // Download asset index
         println!("Downloading asset index...");
         let assets_dir = data_dir.join("assets");
-        let _ = download_from_uri(&self.asset_index.url, &assets_dir.join("indexes").join(format!("{}.json", self.asset_index.id)), Some(&*self.asset_index.sha1), false).await;
+        let asset_index_path = &assets_dir.join("indexes").join(format!("{}.json", self.asset_index.id));
+        let _ = download_from_uri(&self.asset_index.url, asset_index_path, Some(&*self.asset_index.sha1), false).await;
+
+        if asset_index_path.exists() {
+            println!("Downloading assets");
+
+            let contents = read_to_string(asset_index_path).unwrap();
+            let asset_index: vanilla::AssetIndex = serde_json::from_str(&contents).unwrap();
+
+            download_asset_objects(asset_index, &assets_dir).await;
+        }
+        else {
+            return Err("No asset index found!".to_string());
+        }
 
         // Download libraries
         let natives_dir = &data_dir.join(format!("natives/{}", &self.id));

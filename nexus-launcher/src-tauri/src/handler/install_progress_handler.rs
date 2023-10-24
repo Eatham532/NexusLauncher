@@ -3,7 +3,7 @@ use tauri::Window;
 use piston_lib::processes::installation::HandleProgress;
 
 #[derive(Clone, Serialize)]
-pub struct Payload {
+struct InstallPayload {
     progress: i32,
     id: String,
     message: String,
@@ -18,7 +18,7 @@ impl HandleProgress for InstallProgressHandler {
         println!("{}", message);
         self.window.emit("game-install-progress",
 
-                         Payload {
+                         InstallPayload {
                                     progress,
                                     id: id.into(),
                                     message: message.into(),

@@ -7,7 +7,7 @@ use serde::de::Unexpected::Option;
 use tauri::Window;
 use tokio::sync::Mutex;
 use tokio::time::{sleep, Duration};
-use crate::config::structs::instances::NexusInstance;
+use crate::config::instance::NexusInstance;
 
 
 #[derive(Clone)]

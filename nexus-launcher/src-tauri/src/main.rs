@@ -9,6 +9,7 @@ pub mod services;
 mod handler;
 
 use std::collections::VecDeque;
+use std::fs::create_dir_all;
 use std::sync::Mutex;
 use specta::{collect_types};
 use tauri_specta::{ts};
@@ -16,8 +17,10 @@ use tauri::Manager;
 use tauri::RunEvent::WindowEvent;
 use piston_lib::data_structures::game::mojang_version_manifest::VersionManifestRoot;
 use crate::config::*;
-use crate::config::structs::instances::{NexusInstance, InstancesToml};
-use crate::processes::instance::{get_versions, install_instance};
+use crate::config::instance::{NexusInstance, InstancesToml};
+use crate::processes::auth::{cancel_auth, start_login};
+use crate::processes::instance::{get_versions, install_instance, launch_instance};
+use crate::processes::user::get_pfp_path;
 use crate::services::install_service::InstallationService;
 
 
@@ -30,6 +33,7 @@ fn greet(name: &str) -> String {
 
 /// Initialize the app
 fn main() {
+    #[cfg(debug_assertions)]
     export_bindings();
     /*write_instance_toml(InstancesToml {
         instance: vec!(NexusInstance::default()),
@@ -38,13 +42,18 @@ fn main() {
     let builder = tauri::Builder::default()
         .manage(InstallationService::new())
         .invoke_handler(tauri::generate_handler![
-            get_app_config_dir_path,
+            get_appdata_dir_path,
             get_app_config,
             write_app_config,
             get_instances_toml,
             write_instance_toml,
             install_instance,
             get_versions,
+            launch_instance,
+            start_login,
+            cancel_auth,
+            get_pfp_path,
+            get_users
         ])
         .setup(|app| {
             let win = app.get_window("main").unwrap();
@@ -79,28 +88,46 @@ fn main() {
 /// Export the tauri-specta bindings
 fn export_bindings() {
     // TODO In the future add multiple files with bindings for organisation
+    let path = "../src/scripts/rust";
 
-    #[cfg(debug_assertions)]
     match ts::export(collect_types![
+        get_instances_toml,
+        write_instance_toml,
         install_instance,
         get_versions,
-    ], "../src/bindings.ts")
+        launch_instance,
+    ], format!("{}/instances.ts", path))
     {
-        Ok(_) => println!("Export to bindings.ts successful"),
+        Ok(_) => println!("Export to instances.ts successful"),
         Err(e) => eprintln!("Error during export to bindings.ts: {:?}", e),
     };
 
-    #[cfg(debug_assertions)]
     match ts::export(collect_types![
-        get_app_config_dir_path,
+        start_login,
+        cancel_auth,
+    ], format!("{}/auth.ts", path))
+    {
+        Ok(_) => println!("Export to auth.ts successful"),
+        Err(e) => eprintln!("Error during export to bindings.ts: {:?}", e),
+    };
+
+    match ts::export(collect_types![
+        get_appdata_dir_path,
         get_app_config,
         write_app_config,
-        get_instances_toml,
-        write_instance_toml,
-    ], "../src/config.ts")
+    ], format!("{}/config.ts", path))
     {
         Ok(_) => println!("Export to config.ts successful"),
         Err(e) => eprintln!("Error during export to config.ts: {:?}", e),
-    };;
+    };
+
+    match ts::export(collect_types![
+        get_pfp_path,
+        get_users,
+    ], format!("{}/user.ts", path))
+    {
+        Ok(_) => println!("Export to config.ts successful"),
+        Err(e) => eprintln!("Error during export to user.ts: {:?}", e),
+    };
 }
 

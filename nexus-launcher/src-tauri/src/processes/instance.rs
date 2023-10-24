@@ -1,6 +1,6 @@
 use tauri::{State, Window};
 use piston_lib::data_structures::game::mojang_version_manifest::VersionManifestRoot;
-use crate::config::structs::instances::NexusInstance;
+use crate::config::instance::NexusInstance;
 use crate::services::install_service::InstallationService;
 
 
@@ -19,4 +19,12 @@ pub async fn install_instance<'a>(service: State<'a, InstallationService>, insta
 pub async fn get_versions() -> VersionManifestRoot {
     let versions = piston_lib::processes::installation::vanilla::get_version_manifest().await.unwrap();
     versions
+}
+
+#[tauri::command]
+#[specta::specta]
+/// Launch an instance
+pub async fn launch_instance(instance: NexusInstance) {
+    instance.launch().await;
+    println!("Done");
 }

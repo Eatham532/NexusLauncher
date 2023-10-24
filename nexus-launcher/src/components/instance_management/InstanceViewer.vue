@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, Ref} from "vue";
-import {getInstancesToml, NexusInstance} from "../../config.ts";
+import {getInstancesToml, NexusInstance} from "../../scripts/rust/instances.ts";
 import SkeletonBasic from "../skeleton/SkeletonBasic.vue";
 import InstanceCard from "./InstanceCard.vue";
 
