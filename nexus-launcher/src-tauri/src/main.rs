@@ -20,7 +20,7 @@ use crate::config::*;
 use crate::config::instance::{NexusInstance, InstancesToml};
 use crate::processes::auth::{cancel_auth, start_login};
 use crate::processes::instance::{get_versions, install_instance, launch_instance};
-use crate::processes::user::get_pfp_path;
+use crate::processes::user::{get_pfp_path, change_active_user, logout_user};
 use crate::services::install_service::InstallationService;
 
 
@@ -53,7 +53,9 @@ fn main() {
             start_login,
             cancel_auth,
             get_pfp_path,
-            get_users
+            get_users,
+            change_active_user,
+            logout_user,
         ])
         .setup(|app| {
             let win = app.get_window("main").unwrap();
@@ -124,6 +126,8 @@ fn export_bindings() {
     match ts::export(collect_types![
         get_pfp_path,
         get_users,
+        change_active_user,
+        logout_user,
     ], format!("{}/user.ts", path))
     {
         Ok(_) => println!("Export to config.ts successful"),

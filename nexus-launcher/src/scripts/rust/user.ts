@@ -21,5 +21,13 @@ export function getUsers() {
     return invoke()<UsersJson>("get_users")
 }
 
+export function changeActiveUser(uuid: string) {
+    return invoke()<null>("change_active_user", { uuid })
+}
+
+export function logoutUser(uuid: string) {
+    return invoke()<null>("logout_user", { uuid })
+}
+
 export type UsersJson = { active: string | null; users: { [key: string]: NexusUser } }
 export type NexusUser = { uuid: string; username: string; access_token: string; refresh_token: string; expires: string }

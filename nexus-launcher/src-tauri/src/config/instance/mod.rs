@@ -16,7 +16,7 @@ use piston_lib::processes::installation;
 use piston_lib::processes::installation::{HandleProgress, vanilla};
 use piston_lib::processes::installation::vanilla::get_version_info;
 use piston_lib::processes::launcher::args::get_classpaths;
-use crate::config::{get_app_config, get_appdata_dir_path, get_instances_toml, get_users, write_instance_toml};
+use crate::config::{add_user, get_app_config, get_appdata_dir_path, get_instances_toml, get_users, write_instance_toml, write_users_json};
 use crate::config::user::NexusUser;
 use crate::handler::install_progress_handler::InstallProgressHandler;
 
@@ -128,15 +128,17 @@ impl NexusInstance {
         let client_jar_path = versions_dir.join(self.get_parsed_version_str()).join(format!("{}.jar", &self.get_parsed_version_str()));
         println!("Client Jar Path: {:?}", client_jar_path);
 
-        let users = get_users();
-        let current_user : &NexusUser = match users.active {
-            Some(u) => users.users.get(&u).unwrap(),
-            None => users.users.values().next().unwrap(),
+        let mut users = get_users();
+        let mut mut_user = match &users.active {
+            Some(u) => users.users.get(u).unwrap().to_owned(),
+            None => users.users.values().next().unwrap().to_owned(),
         };
 
+        let current_user = &mut_user.clone();
 
+        println!("Generating args");
         let mc_args = piston_lib::processes::launcher::args::MinecraftArgs {
-            access_token: current_user.access_token.clone(),
+            access_token: mut_user.get_minecraft_access_token().await.to_string(),
             username: current_user.username.clone(),
             uuid: current_user.uuid.clone(),
             version: self.game_version.clone(),
@@ -148,6 +150,8 @@ impl NexusInstance {
             resolution: Default::default(),
         };
 
+        println!("Mc args");
+
         let jvm_args = piston_lib::processes::launcher::args::JvmArgs {
             natives_path: data_dir.join("natives").join(self.game_version.clone()),
             libraries_path: data_dir.join("libraries"),
@@ -158,6 +162,7 @@ impl NexusInstance {
 
         std::fs::create_dir_all(self.path.clone()).unwrap();
 
+        println!("Creating command");
         //let mut command = Command::new("C:\\Users\\eatha\\AppData\\Roaming\\com.modrinth.theseus\\meta\\java_versions\\zulu8.72.0.17-ca-jre8.0.382-win_x64\\bin\\javaw.exe");
         let mut command = Command::new("java");
         if let Some(default_args) = version_info.arguments {

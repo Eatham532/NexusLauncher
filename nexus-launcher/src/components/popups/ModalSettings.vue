@@ -2,7 +2,7 @@
 
 import SettingsSidebarBtn from "../settings/SettingsSidebarBtn.vue";
 import NButton from "../common/NButton.vue";
-import {Ref, ref} from "vue";
+import {Ref, ref, watch} from "vue";
 import {pick_folder} from "../../scripts/fs.ts";
 import {animate} from "../../scripts/utils.ts";
 import {writeAppConfig, AppConfig, getAppConfig} from "../../scripts/rust/config.ts";
@@ -10,22 +10,22 @@ import {ask} from "@tauri-apps/api/dialog";
 
 const emit = defineEmits(['close']);
 
+
 const config: Ref<AppConfig> = ref({
   metadata_dir: "",
   default_instances_dir: "",
+  cache_dir: "",
 });
 
-let original_conf: AppConfig = {
-  metadata_dir: "",
-  default_instances_dir: "",
-};
+let initialSettings: string;
+
 
 const selectedBtn = ref('');
 const showNotice = ref(false);
 
 getAppConfig().then((value) => {
   config.value = value;
-  original_conf = value;
+  initialSettings = JSON.stringify(config.value);
 });
 
 function goTo(id: string) {
@@ -89,7 +89,6 @@ async function pickInstanceDefaultDir() {
 
 function save() {
   writeAppConfig(config.value).then(() => {
-    original_conf = config.value;
     showNotice.value = true;
     setTimeout(() => {
       showNotice.value = false;
@@ -98,20 +97,18 @@ function save() {
 }
 
 async function close() {
-  let new_conf: AppConfig = config.value;
-  if (original_conf !== new_conf) {
+  console.log(initialSettings);
+  console.log(JSON.stringify(config.value));
+
+  if (initialSettings != JSON.stringify(config.value)) {
     const response = await ask('Continuing will discard all your changes. Are you sure you want to continue?', { title: 'You forgot to click save!', type: 'warning' });
     console.log("Discarding...");
-    console.log(original_conf);
-    console.log(new_conf);
     if (response) {
       emit("close");
     }
   }
   else {
     console.log("Discarding...");
-    console.log(original_conf);
-    console.log(new_conf);
     emit("close");
   }
 }
@@ -122,7 +119,9 @@ async function close() {
   <div class="rootDiv">
     <div class="navigation">
       <div>
+<!--
         <SettingsSidebarBtn :selected="selectedBtn == 'SettingDirectories'" @click="goTo('SettingDirectories')">Directories</SettingsSidebarBtn>
+-->
       </div>
       <div>
         <div :class="{notice: true, notice_fade: !showNotice}">
@@ -192,6 +191,10 @@ async function close() {
   }
 }
 
+h1 {
+  padding: 20px 0 10px 30px;
+}
+
 .actions {
   display: flex;
   justify-content: space-around;
@@ -199,7 +202,7 @@ async function close() {
 
 .option {
   border-radius: 20px;
-  margin: 10px;
+  margin: 20px;
   padding: 20px;
   background-color: var(--primary-500);
 }

@@ -15,6 +15,8 @@ use chrono::Utc;
 use oauth2::TokenResponse;
 use chrono::Duration;
 
+// TODO: Fix authentication bug when logging into 2 accounts within 1 session
+
 lazy_static! {
     static ref CANCEL_SENDER: Arc<Mutex<Option<oneshot::Sender<()>>>> = Arc::new(Mutex::new(None));
 }
@@ -40,8 +42,11 @@ pub enum AuthStage {
 pub async fn start_login(window: Window) -> Result<(), String> {
     println!("Starting login");
 
+    /// TODO: Auth code expires
+
+
     // Cancel any previous auth processes
-    let client = get_auth_client("9c203c7d-1816-4d24-87f2-9731ce05e187").await;
+    let client = get_auth_client("9c203c7d-1816-4d24-87f2-9731ce05e187");
 
 
     let login_info = get_login_details(&client).await.unwrap();

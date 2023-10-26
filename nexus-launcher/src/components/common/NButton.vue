@@ -48,7 +48,6 @@
     box-shadow: var(--gray-900) 0px 0px 0px 0px;
     border-radius: 10px;
     transition : 200ms;
-    transform: translateY(0);
     display: flex;
     flex-direction: row;
     align-items: center;

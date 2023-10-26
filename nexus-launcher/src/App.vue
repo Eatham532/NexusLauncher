@@ -143,7 +143,7 @@ appWindow.setFocus();
     & #sidebar-base {
       box-shadow: var(--gray-800) 6px 6px 4px;
       border-radius: 30px;
-      background: var(--secondary-400);
+      background: var(--gray-400);
 
       & #sidebar-top {
         border-radius: 30px;
