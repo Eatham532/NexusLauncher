@@ -20,7 +20,7 @@ import InstanceCard from "./InstanceCard.vue";
         <instance-card class="card" v-for="instance in instances" :instance="instance"/>
         <div v-if="!instances.length" style="width: 100%; height: 100%; display: flex; flex-direction: column; text-align: center">
           <h2>THERE ARE NO INSTANCES INSTALLED!</h2>
-          <P>&lt- Please install an instance by clicking the + button</P>
+          <p>&lt- Please install an instance by clicking the + button</p>
         </div>
       </div>
     </template>

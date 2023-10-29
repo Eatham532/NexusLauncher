@@ -20,7 +20,7 @@ use crate::config::*;
 use crate::config::instance::{NexusInstance, InstancesToml};
 use crate::processes::auth::{cancel_auth, start_login};
 use crate::processes::instance::{get_versions, install_instance, launch_instance};
-use crate::processes::user::{get_pfp_path, change_active_user, logout_user};
+use crate::processes::user::{get_pfp_path, change_active_user, logout_user, pre_download_user_icons};
 use crate::services::install_service::InstallationService;
 
 
@@ -33,11 +33,7 @@ fn greet(name: &str) -> String {
 
 /// Initialize the app
 fn main() {
-    #[cfg(debug_assertions)]
-    export_bindings();
-    /*write_instance_toml(InstancesToml {
-        instance: vec!(NexusInstance::default()),
-    });*/
+    do_pre_work();
 
     let builder = tauri::Builder::default()
         .manage(InstallationService::new())
@@ -85,6 +81,15 @@ fn main() {
     builder.run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+
+fn do_pre_work() {
+    pre_download_user_icons();
+
+    #[cfg(debug_assertions)]
+    export_bindings();
+}
+
 
 
 /// Export the tauri-specta bindings

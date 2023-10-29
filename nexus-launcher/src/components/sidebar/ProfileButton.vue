@@ -23,21 +23,21 @@ async function reload_component() {
   let users = await getUsers();
   usersRef.value = users;
 
-  pfpImage.value.clear();
   pfpImage.value.set(null, "/ProfileIconPlaceholder.png")
 
-  console.log(users.active);
   for (let i in users.users) {
-    pfpImage.value.set(users.users[i].uuid, await get_icon_path(users.users[i].uuid));
+    if (!pfpImage.value.has(users.users[i].uuid)) {
+      pfpImage.value.set(users.users[i].uuid, await get_icon_path(users.users[i].uuid, false));
+    }
   }
 
   console.log(pfpImage.value);
 }
 
-async function get_icon_path(uuid: string): Promise<string> {
+async function get_icon_path(uuid: string, redownload: boolean): Promise<string> {
   let default_path = "/ProfileIconPlaceholder.png"
 
-  let path = await getPfpPath(uuid)
+  let path = await getPfpPath(uuid, redownload);
 
   if (path == default_path) {
     return default_path;
@@ -56,7 +56,7 @@ listen<AuthPayload>('auth_login', (event) => {
   if (typeof event.payload.stage === 'string') {
     switch (event.payload.stage) {
       case "Complete":
-        reload_component()
+        reload_component(true)
         break;
     }
   }
@@ -89,11 +89,7 @@ async function logout(uuid: string) {
   // TODO: Fancy active user switching
   // TODO: Switch active user on logout
 
-  for (let i in users.users) {
-    if (!pfpImage.value.has(users.users[i].uuid)) {
-      pfpImage.value.set(users.users[i].uuid, await get_icon_path(users.users[i].uuid));
-    }
-  }
+  await reload_component();
 
   if (users.users[0]) {
     change_acc(users.users[0].uuid);

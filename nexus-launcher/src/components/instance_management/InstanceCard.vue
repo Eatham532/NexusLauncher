@@ -9,6 +9,8 @@ import {NexusInstance, launchInstance} from "../../scripts/rust/instances.ts";
 import {listen} from "@tauri-apps/api/event";
 import {ref} from "vue";
 import NButton from "../common/NButton.vue";
+import NContextMenu from "../common/NContextMenu.vue";
+import {message} from "@tauri-apps/api/dialog";
 
 const props = defineProps({
   instance: {
@@ -64,6 +66,13 @@ function launchInstanceClick() {
     }
   }
 }
+
+
+const contextMenu: any = ref(null);
+const openContextMenu = (e: any) => {
+  contextMenu.value?.open(e);
+};
+
 </script>
 
 <template>
@@ -71,13 +80,13 @@ function launchInstanceClick() {
     root: true,
     none: progress === 0,
     installed: progress >= 100,
-  }" @click="$emit('click')">
+  }" @click.self="$emit('click')" @click.right.prevent="openContextMenu">
     <div class="spacer"></div>
     <div class="BtnContent">
       <div class="InstanceName"><p>{{ instance.name }}</p></div>
       <div class="bottom-section">
         <div class="BtnDiv">
-          <NButton class="PlayButton" @click="launchInstanceClick" :disabled="progress != 100">
+          <NButton class="PlayButton" @click.self="launchInstanceClick" :disabled="progress != 100">
             Play
           </NButton>
         </div>
@@ -88,6 +97,15 @@ function launchInstanceClick() {
       </div>
       <div></div>
     </div>
+    <NContextMenu ref="contextMenu">
+      <ul class="contextMenu">
+        <li @click="message('That action is still in development')">Manage Instance</li>
+        <li class="warn" @click="message('That action is still in development')">
+          Delete Instance
+          <svg xmlns="http://www.w3.org/2000/svg" height="1.2rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </li>
+      </ul>
+    </NContextMenu>
   </div>
 </template>
 
@@ -182,6 +200,36 @@ function launchInstanceClick() {
           }
         }
       }
+    }
+  }
+
+  .contextMenu {
+    background-color: red;
+
+    & li {
+      color: var(--gray-900);
+      list-style-type: none;
+      padding: 10px;
+      background-color: var(--gray-200);
+      cursor: pointer;
+      transition: all .5s;
+      font-size: 0.9rem;
+      display: flex;
+      gap: 10px;
+
+      &:hover {
+        background-color: var(--gray-500);
+
+        &:is(.warn) {
+          background-color: #a82a2a;
+        }
+      }
+
+
+    }
+
+    & svg {
+      color: black;
     }
   }
 </style>

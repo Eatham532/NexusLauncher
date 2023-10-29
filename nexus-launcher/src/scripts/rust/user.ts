@@ -10,8 +10,8 @@ declare global {
 // Function avoids 'window not defined' in SSR
 const invoke = () => window.__TAURI_INVOKE__;
 
-export function getPfpPath(uuid: string) {
-    return invoke()<string>("get_pfp_path", { uuid })
+export function getPfpPath(uuid: string, replaceOld: boolean) {
+    return invoke()<string>("get_pfp_path", { uuid,replaceOld })
 }
 
 /**

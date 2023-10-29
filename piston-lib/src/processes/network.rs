@@ -16,6 +16,7 @@ pub enum DownloadResult {
 }
 pub async fn download_from_uri(url: &str, destination: &PathBuf, sha1: Option<&str>, overwrite: bool) -> Result<DownloadResult, Box<dyn Error>> {
     // Check if file exists and overwrite flag is false
+
     if destination.exists() && !overwrite {
         return Ok(Exists);
     }
