@@ -31,4 +31,4 @@ export function writeAppConfig(config: AppConfig) {
     return invoke()<null>("write_app_config", { config })
 }
 
-export type AppConfig = { metadata_dir: string; cache_dir: string; default_instances_dir: string }
+export type AppConfig = { metadata_dir: string; cache_dir: string; default_instances_dir: string; dev_mode: boolean }

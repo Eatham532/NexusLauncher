@@ -65,6 +65,17 @@
         "icons/icon.ico"
       ]
     },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://gist.githubusercontent.com/Eatham532/035c65c6eedf455fd69352fa033a57c9/raw/d008022b95b39f5d15afdfc67c163828099ed701/nexuslauncher-update.json"
+      ],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDYwM0MwRkZEREM0QzlCNEYKUldSUG0wemMvUTg4WUZhdmd2VkJpekNSTk9BZElibTNkSENTZW5ycWFjS3lEbFRXVTRhREhzNm0K",
+      "windows": {
+        "installMode": "passive"
+      }
+    },
     "security": {
       "csp": null
     },
