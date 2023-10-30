@@ -96,9 +96,7 @@ appWindow.setFocus();
         <NChip>Hello</NChip>
         <NChip>Hello</NChip>-->
       </div>
-      <InstanceViewer>
-
-      </InstanceViewer>
+      <InstanceViewer></InstanceViewer>
     </div>
   </div>
 
@@ -165,7 +163,6 @@ appWindow.setFocus();
   #instance-manager {
     display: block;
     width: 100%;
-    height: 100vh;
 
     & .action-bar {
       height: 40px;

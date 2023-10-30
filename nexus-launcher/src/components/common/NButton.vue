@@ -23,17 +23,17 @@
     square: {
       type: Boolean,
       default: false,
-    },
+    }
   })
 </script>
 
 <template>
   <button :class="{
-    'expand': props.expand,
-    'use_padding': props.use_padding,
-    'outline': props.outline,
-    'transparent': props.transparent,
-    'square': props.square,
+    'expand': expand,
+    'use_padding': use_padding,
+    'outline': outline,
+    'transparent': transparent,
+    'square': square,
   }
 "
   :disabled="disabled">

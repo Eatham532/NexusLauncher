@@ -2,6 +2,8 @@ mod config;
 
 use std::cell::Cell;
 use std::collections::VecDeque;
+use std::fs;
+use std::fs::remove_dir_all;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
@@ -18,7 +20,7 @@ use piston_lib::processes::installation::vanilla::get_version_info;
 use piston_lib::processes::launcher::args::get_classpaths;
 use crate::config::{add_user, get_app_config, get_appdata_dir_path, get_instances_toml, get_users, write_instance_toml, write_users_json};
 use crate::config::user::NexusUser;
-use crate::handler::install_progress_handler::InstallProgressHandler;
+use crate::handlers::install_progress_handler::InstallProgressHandler;
 
 #[derive(Deserialize, Serialize, Type)]
 pub struct InstancesToml {
@@ -179,6 +181,21 @@ impl NexusInstance {
         println!();
         println!("Result:");
         println!("{:?}", result);
+    }
+
+    pub fn delete(&self) {
+        let mut instance_toml = get_instances_toml();
+        match instance_toml.instances.iter().position(|x| x.id == self.id) {
+            Some(index) => {
+                instance_toml.instances.remove(index);
+                write_instance_toml(instance_toml);
+            },
+            None => {}
+        }
+        if (Path::new(&self.path)).exists() {
+            remove_dir_all(self.path.clone()).expect("Failed to delete instance data dir");
+        }
+
     }
 }
 

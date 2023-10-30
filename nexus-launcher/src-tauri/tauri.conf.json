@@ -44,7 +44,9 @@
       },
       "fs": {
         "all": false,
-        "readDir": true
+        "readDir": true,
+        "exists": true,
+        "scope": ["**"]
       },
       "protocol": {
         "asset": true,

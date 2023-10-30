@@ -6,7 +6,7 @@ mod fs;
 mod config;
 mod processes;
 pub mod services;
-mod handler;
+mod handlers;
 
 use std::collections::VecDeque;
 use std::fs::create_dir_all;
@@ -19,7 +19,7 @@ use piston_lib::data_structures::game::mojang_version_manifest::VersionManifestR
 use crate::config::*;
 use crate::config::instance::{NexusInstance, InstancesToml};
 use crate::processes::auth::{cancel_auth, start_login};
-use crate::processes::instance::{get_versions, install_instance, launch_instance};
+use crate::processes::instance::{get_versions, install_instance, launch_instance, delete_instance};
 use crate::processes::user::{get_pfp_path, change_active_user, logout_user, pre_download_user_icons};
 use crate::services::install_service::InstallationService;
 
@@ -46,6 +46,7 @@ fn main() {
             install_instance,
             get_versions,
             launch_instance,
+            delete_instance,
             start_login,
             cancel_auth,
             get_pfp_path,
@@ -103,6 +104,7 @@ fn export_bindings() {
         install_instance,
         get_versions,
         launch_instance,
+        delete_instance,
     ], format!("{}/instances.ts", path))
     {
         Ok(_) => println!("Export to instances.ts successful"),

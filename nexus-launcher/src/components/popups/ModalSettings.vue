@@ -136,7 +136,9 @@ async function close() {
     <div id="settingsOptions">
       <h1 class="SettingDirectories">Directories</h1>
       <div class="option">
-        <h2>Metadata Config</h2>
+        <div class="text-wrapper">
+          <h2>Metadata</h2>
+        </div>
         <div style="display: flex; gap: 20px">
           <input class="NTextbox" type="text" v-model="config.metadata_dir">
           <NButton use_padding @click="pickMetadataDir">
@@ -145,7 +147,11 @@ async function close() {
         </div>
       </div>
       <div class="option">
-        <h2>Default instance directory</h2>
+        <div class="text-wrapper">
+          <h2>Default Instances</h2>
+          <p>The location where your instances will be installed.</p>
+          <p>Note this is not the location where the individual instance data is stored.</p>
+        </div>
         <div style="display: flex; gap: 20px">
           <input class="NTextbox" type="text" v-model="config.default_instances_dir">
           <NButton use_padding @click="pickInstanceDefaultDir">
@@ -189,6 +195,16 @@ async function close() {
     overflow-y: auto;
     background: var(--primary-900);
   }
+}
+
+.text-wrapper {
+  line-height: 5px;
+
+  & h2 {
+    margin-bottom: 30px;
+  }
+
+  margin: 0 0 50px 0;
 }
 
 h1 {
