@@ -3,6 +3,8 @@ on: [pull_request]
 
 jobs:
   test-tauri:
+    env:
+      working-dir: ./nexus-launcher
     strategy:
       fail-fast: false
       matrix:
@@ -22,11 +24,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+        working-directory: ${{ env.working-dir}}
       - name: install frontend dependencies
         run: |
           npm i vue-tsc -D
           npm install
+        working-directory: ${{ env.working-dir}}
       - uses: tauri-apps/tauri-action@v0
+        with:
+            projectPath: ${{ env.working-dir}}
         env:
           TAURI_PRIVATE_KEY: ${{ secretsTAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
