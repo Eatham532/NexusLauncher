@@ -54,7 +54,7 @@ fn main() {
             change_active_user,
             logout_user,
         ])
-        .setup(|app| {
+        /*.setup(|app| {
             let win = app.get_window("main").unwrap();
             #[cfg(target_os = "macos")]
             {
@@ -65,9 +65,9 @@ fn main() {
             }
 
             Ok(())
-        });
+        })*/;
 
-    #[cfg(target_os = "macos")]
+    /*#[cfg(target_os = "macos")]
     {
         use tauri::WindowEvent;
         builder.on_window_event(|e| {
@@ -77,7 +77,7 @@ fn main() {
                 win.position_traffic_lights(30.0, 30.0);
             }
         });
-    }
+    }*/
 
     builder.run(tauri::generate_context!())
         .expect("error while running tauri application");
