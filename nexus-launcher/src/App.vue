@@ -5,7 +5,7 @@
 import {appWindow} from "@tauri-apps/api/window"
 import ProfileButton from "./components/sidebar/ProfileButton.vue";
 import SidebarButton from "./components/sidebar/SidebarButton.vue";
-import {markRaw, ref} from "vue";
+import {markRaw} from "vue";
 import ModalInstall from "./components/popups/ModalInstall.vue";
 import ModalSettings from "./components/popups/ModalSettings.vue";
 import {useModal} from "./composables/useModal.ts";
@@ -96,9 +96,7 @@ appWindow.setFocus();
         <NChip>Hello</NChip>
         <NChip>Hello</NChip>-->
       </div>
-      <InstanceViewer>
-
-      </InstanceViewer>
+      <InstanceViewer></InstanceViewer>
     </div>
   </div>
 
@@ -143,7 +141,7 @@ appWindow.setFocus();
     & #sidebar-base {
       box-shadow: var(--gray-800) 6px 6px 4px;
       border-radius: 30px;
-      background: var(--secondary-400);
+      background: var(--gray-400);
 
       & #sidebar-top {
         border-radius: 30px;
@@ -165,7 +163,6 @@ appWindow.setFocus();
   #instance-manager {
     display: block;
     width: 100%;
-    height: 100vh;
 
     & .action-bar {
       height: 40px;

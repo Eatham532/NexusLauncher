@@ -1,39 +1,43 @@
 <script setup lang="ts">
 
-import SettingsSidebarBtn from "../settings/SettingsSidebarBtn.vue";
 import NButton from "../common/NButton.vue";
 import {Ref, ref} from "vue";
 import {pick_folder} from "../../scripts/fs.ts";
+/*
 import {animate} from "../../scripts/utils.ts";
+*/
 import {writeAppConfig, AppConfig, getAppConfig} from "../../scripts/rust/config.ts";
 import {ask} from "@tauri-apps/api/dialog";
 
 const emit = defineEmits(['close']);
 
+
 const config: Ref<AppConfig> = ref({
   metadata_dir: "",
   default_instances_dir: "",
+  cache_dir: "",
+  dev_mode: false,
 });
 
-let original_conf: AppConfig = {
-  metadata_dir: "",
-  default_instances_dir: "",
-};
+let initialSettings: string;
 
+
+/*
 const selectedBtn = ref('');
+*/
 const showNotice = ref(false);
 
 getAppConfig().then((value) => {
   config.value = value;
-  original_conf = value;
+  initialSettings = JSON.stringify(config.value);
 });
 
-function goTo(id: string) {
+/*function goTo(id: string) {
   const element = document.getElementById(id);
   if (element) {
-    /*
+    /!*
         element.scrollIntoView({behavior: "smooth", block: 'nearest', inline: 'start'});
-    */
+    *!/
 
     let parentNode : HTMLDivElement = element.parentNode as HTMLDivElement;
     let targetTop = element.offsetTop - parentNode.offsetTop;
@@ -48,7 +52,7 @@ function goTo(id: string) {
 
   selectedBtn.value = id;
   console.log(selectedBtn.value);
-}
+}*/
 
 /*function scroll() {
   /!*const element = document.getElementById("settingsOptions");
@@ -89,7 +93,6 @@ async function pickInstanceDefaultDir() {
 
 function save() {
   writeAppConfig(config.value).then(() => {
-    original_conf = config.value;
     showNotice.value = true;
     setTimeout(() => {
       showNotice.value = false;
@@ -98,20 +101,18 @@ function save() {
 }
 
 async function close() {
-  let new_conf: AppConfig = config.value;
-  if (original_conf !== new_conf) {
+  console.log(initialSettings);
+  console.log(JSON.stringify(config.value));
+
+  if (initialSettings != JSON.stringify(config.value)) {
     const response = await ask('Continuing will discard all your changes. Are you sure you want to continue?', { title: 'You forgot to click save!', type: 'warning' });
     console.log("Discarding...");
-    console.log(original_conf);
-    console.log(new_conf);
     if (response) {
       emit("close");
     }
   }
   else {
     console.log("Discarding...");
-    console.log(original_conf);
-    console.log(new_conf);
     emit("close");
   }
 }
@@ -122,7 +123,9 @@ async function close() {
   <div class="rootDiv">
     <div class="navigation">
       <div>
+<!--
         <SettingsSidebarBtn :selected="selectedBtn == 'SettingDirectories'" @click="goTo('SettingDirectories')">Directories</SettingsSidebarBtn>
+-->
       </div>
       <div>
         <div :class="{notice: true, notice_fade: !showNotice}">
@@ -137,7 +140,9 @@ async function close() {
     <div id="settingsOptions">
       <h1 class="SettingDirectories">Directories</h1>
       <div class="option">
-        <h2>Metadata Config</h2>
+        <div class="text-wrapper">
+          <h2>Metadata</h2>
+        </div>
         <div style="display: flex; gap: 20px">
           <input class="NTextbox" type="text" v-model="config.metadata_dir">
           <NButton use_padding @click="pickMetadataDir">
@@ -146,7 +151,11 @@ async function close() {
         </div>
       </div>
       <div class="option">
-        <h2>Default instance directory</h2>
+        <div class="text-wrapper">
+          <h2>Default Instances</h2>
+          <p>The location where your instances will be installed.</p>
+          <p>Note this is not the location where the individual instance data is stored.</p>
+        </div>
         <div style="display: flex; gap: 20px">
           <input class="NTextbox" type="text" v-model="config.default_instances_dir">
           <NButton use_padding @click="pickInstanceDefaultDir">
@@ -192,6 +201,20 @@ async function close() {
   }
 }
 
+.text-wrapper {
+  line-height: 5px;
+
+  & h2 {
+    margin-bottom: 30px;
+  }
+
+  margin: 0 0 50px 0;
+}
+
+h1 {
+  padding: 20px 0 10px 30px;
+}
+
 .actions {
   display: flex;
   justify-content: space-around;
@@ -199,7 +222,7 @@ async function close() {
 
 .option {
   border-radius: 20px;
-  margin: 10px;
+  margin: 20px;
   padding: 20px;
   background-color: var(--primary-500);
 }

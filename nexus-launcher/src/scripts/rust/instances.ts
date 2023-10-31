@@ -45,10 +45,17 @@ export function launchInstance(instance: NexusInstance) {
     return invoke()<null>("launch_instance", { instance })
 }
 
+/**
+ * Delete an instance
+ */
+export function deleteInstance(instance: NexusInstance) {
+    return invoke()<null>("delete_instance", { instance })
+}
+
 export type Modloader = "Vanilla" | "Fabric" | "Forge" | "Quilt"
-export type InstancesToml = { Instance: NexusInstance[] }
 export type InstanceInstallStage = "Installed" | "Installing" | "Cancelled" | "None"
+export type NexusInstance = { id: string; install_stage: InstanceInstallStage; name: string; game_version: string; modloader: Modloader; loader_version: string | null; path: string }
+export type InstancesToml = { Instance: NexusInstance[] }
 export type Latest = { release: string; snapshot: string }
 export type VersionManifestRoot = { latest: Latest; versions: Version[] }
-export type NexusInstance = { id: string; install_stage: InstanceInstallStage; name: string; game_version: string; modloader: Modloader; loader_version: string | null; path: string }
 export type Version = { id: string; type: string; url: string; time: string; releaseTime: string; sha1: string; complianceLevel: number }

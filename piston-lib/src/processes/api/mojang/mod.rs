@@ -29,6 +29,8 @@ fn get_api_path(endpoint: &str) -> String {
 
 
 /// This endpoint allows an authenticated user to check if they own a copy of Minecraft.
+/// TODO: Verification does not work for Xbox Game pass
+/// TODO: Check legitimate response https://wiki.vg/Microsoft_Authentication_Scheme
 pub async fn verify_game_ownership(bearer_token: &str) -> Result<bool, String> {
     let client = reqwest::Client::new();
     let res = match client.get(get_api_path("/entitlements/mcstore"))

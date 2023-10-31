@@ -3,6 +3,7 @@ members = [
     "piston-lib",
     "nexus-launcher/src-tauri"
 ]
+resolver = "2"
 
 
 [profile.release]

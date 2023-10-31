@@ -46,7 +46,7 @@ pub struct  JvmArgs {
 
 
 
-pub fn format_arguments(arguments: HashMap<ArgumentType, Vec<Argument>>, mc_args: MinecraftArgs, jvm_args: &JvmArgs) -> Vec<String> {
+pub fn format_arguments(arguments: HashMap<ArgumentType, Vec<Argument>>, mc_args: MinecraftArgs, jvm_args: &JvmArgs, main_class: String) -> Vec<String> {
     // Make sure jvm args are before mc_args
 
     let mut mc_args_vec: Vec<String> = Vec::new();
@@ -97,12 +97,33 @@ pub fn format_arguments(arguments: HashMap<ArgumentType, Vec<Argument>>, mc_args
             },
         }
     }
-/*    jvm_args_vec.push("-Dhttp.proxyHost=10.101.174.105 -Dhttp.proxyPort=9666".to_string());
-*/    jvm_args_vec.push("net.minecraft.client.main.Main".to_string());
+/*    jvm_args_vec.push("-Dhttp.proxyHost=10.101.174.105 -Dhttp.proxyPort=9666".to_string());*/
+
+    jvm_args_vec.push("-Dorg.lwjgl.util.Debug=true".to_string());
+    jvm_args_vec.push(main_class);
     jvm_args_vec.append(&mut mc_args_vec);
     jvm_args_vec
 }
 
+pub fn format_arguments_legacy(arguments: String, mc_args: MinecraftArgs, jvm_args: &JvmArgs, main_class: String) -> Vec<String> {
+    let mut args: Vec<String> = Vec::new();
+    // JVM args
+    args.push(format!(
+        "-Djava.library.path={}",
+        &*wrap(&canonicalize(&jvm_args.natives_path).unwrap()
+            .to_string_lossy().to_string())
+    ));
+    args.push("-cp".to_string());
+    args.push(jvm_args.class_paths.clone());
+
+    args.push("-Dorg.lwjgl.util.Debug=true".to_string());
+    // Minecraft args
+    args.push(main_class);
+    for arg in arguments.split(" ") {
+        args.push(parse_minecraft_arg(arg, &mc_args));
+    }
+    args
+}
 
 fn parse_minecraft_arg(argument: &str,
                        mc_args: &MinecraftArgs,

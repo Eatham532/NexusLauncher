@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  const props = defineProps({
+  defineProps({
     disabled: {
       type: Boolean,
       default: false,
@@ -23,17 +23,17 @@
     square: {
       type: Boolean,
       default: false,
-    },
+    }
   })
 </script>
 
 <template>
   <button :class="{
-    'expand': props.expand,
-    'use_padding': props.use_padding,
-    'outline': props.outline,
-    'transparent': props.transparent,
-    'square': props.square,
+    'expand': expand,
+    'use_padding': use_padding,
+    'outline': outline,
+    'transparent': transparent,
+    'square': square,
   }
 "
   :disabled="disabled">
@@ -48,7 +48,6 @@
     box-shadow: var(--gray-900) 0px 0px 0px 0px;
     border-radius: 10px;
     transition : 200ms;
-    transform: translateY(0);
     display: flex;
     flex-direction: row;
     align-items: center;

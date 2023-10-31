@@ -20,8 +20,8 @@ impl HandleProgress for InstallProgressHandler {
 
                          InstallPayload {
                                     progress,
-                                    id: id.into(),
-                                    message: message.into(),
+                                    id: id.to_string(),
+                                    message: message.to_string(),
 
                          }).unwrap();
     }

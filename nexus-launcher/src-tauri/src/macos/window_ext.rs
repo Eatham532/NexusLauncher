@@ -1,4 +1,4 @@
-/// from: https://github.com/tauri-apps/tauri/issues/4789, full credit to haasal
+/*/// from: https://github.com/tauri-apps/tauri/issues/4789, full credit to haasal
 #[cfg(target_os = "macos")]
 use tauri::{Runtime, Window};
 
@@ -68,3 +68,4 @@ impl<R: Runtime> WindowExt for Window<R> {
         }
     }
 }
+*/

@@ -9,23 +9,21 @@ import InstanceCard from "./InstanceCard.vue";
     instances.value = toml.Instance;
     console.log(instances.value);
   });
-
-
 </script>
 
 <template>
   <Suspense>
     <template #default>
-      <div tabindex="0">
+      <div tabindex="0" class="cards-wrapper">
         <instance-card class="card" v-for="instance in instances" :instance="instance"/>
         <div v-if="!instances.length" style="width: 100%; height: 100%; display: flex; flex-direction: column; text-align: center">
           <h2>THERE ARE NO INSTANCES INSTALLED!</h2>
-          <P>&lt- Please install an instance by clicking the + button</P>
+          <p>&lt- Please install an instance by clicking the + button</p>
         </div>
       </div>
     </template>
     <template #fallback>
-      <div>
+      <div class="card-wrapper">
         <SkeletonBasic class="skeleton"/>
         <SkeletonBasic class="skeleton"/>
         <SkeletonBasic class="skeleton"/>
@@ -35,14 +33,18 @@ import InstanceCard from "./InstanceCard.vue";
 </template>
 
 <style scoped>
-div {
+.cards-wrapper {
   overflow-y: auto;
-  height: calc(100vh - 80px);
+  padding: 35px;
+  height: calc(100vh - 160px);
+  display: flex;
+  flex-flow: row wrap;
+  gap: 35px;
+  align-items: flex-start;
 
   & .card {
-    display: inline-block;
     height: 200px;
-    width: 200px;
+    width: 200px;;
   }
 }
 </style>

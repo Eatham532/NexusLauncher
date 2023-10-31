@@ -5,10 +5,13 @@ TODO: FIX SERIALISATION RENAME OF SPECTA
 
 <script setup lang="ts">
 
-import {NexusInstance, launchInstance} from "../../scripts/rust/instances.ts";
+import {NexusInstance, launchInstance, deleteInstance} from "../../scripts/rust/instances.ts";
 import {listen} from "@tauri-apps/api/event";
 import {ref} from "vue";
 import NButton from "../common/NButton.vue";
+import NContextMenu from "../common/NContextMenu.vue";
+import {ask, message} from "@tauri-apps/api/dialog";
+import NTooltip from "../common/NTooltip.vue";
 
 const props = defineProps({
   instance: {
@@ -57,6 +60,7 @@ listen<ProgressPayload>('game-install-progress', (event) => {
 });
 
 function launchInstanceClick() {
+  console.log("Click")
   if (props.instance != undefined) {
     if (props.instance.install_stage == "Installed") {
       console.log("Launching Game...")
@@ -64,6 +68,28 @@ function launchInstanceClick() {
     }
   }
 }
+
+function deleteInstanceClick() {
+  ask(`Are you sure you want to delete the following instance? \n\nName: ${props.instance.name}\nVersion: ${props.instance?.game_version}`, {
+    title: "Delete Instance",
+    okLabel: "Delete",
+    cancelLabel: "Cancel",
+    type: "warning",
+  }).then((response) => {
+    if (response) {
+      console.log("Deleting Instance...");
+      deleteInstance(props.instance);
+      window.location.reload();
+    }
+  });
+}
+
+
+const contextMenu: any = ref(null);
+const openContextMenu = (e: any) => {
+  contextMenu.value?.open(e);
+};
+
 </script>
 
 <template>
@@ -71,52 +97,65 @@ function launchInstanceClick() {
     root: true,
     none: progress === 0,
     installed: progress >= 100,
-  }" @click="$emit('click')">
-    <div class="spacer"></div>
+  }" @click.self="$emit('click')" @click.right.prevent="openContextMenu">
     <div class="BtnContent">
+      <div class="topbar">
+        <NTooltip position="top" :text="instance.modloader">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-box"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </NTooltip>
+      </div>
       <div class="InstanceName"><p>{{ instance.name }}</p></div>
       <div class="bottom-section">
         <div class="BtnDiv">
-          <NButton class="PlayButton" @click="launchInstanceClick" :disabled="progress != 100">
-            Play
+          <NButton class="PlayButton" @click.self="launchInstanceClick" :disabled="progress != 100">
+            <p v-if="progress >= 100">Play</p>
           </NButton>
         </div>
-        <div class="StatsText">
+        <div class="StatsText" style="line-height: 5px">
           <p>{{ instance.modloader }}</p>
           <p>{{ instance.game_version }}</p>
         </div>
       </div>
-      <div></div>
     </div>
+    <NContextMenu ref="contextMenu">
+      <ul class="contextMenu">
+        <li @click="message('That action is still in development')"><p>Manage Instance</p></li>
+        <li class="warn" @click="deleteInstanceClick">
+
+          <p>Delete Instance <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></p>
+        </li>
+      </ul>
+    </NContextMenu>
   </div>
 </template>
 
 <style scoped>
   .root {
+    flex-flow: column;
     background-color: var(--primary-800);
     aspect-ratio: 1;
-    padding: 0;
+    padding: 10px;
     border-radius: 10px;
-    margin: 20px;
     width: 200px;
-    vertical-align: top;
-    overflow: hidden;
     box-shadow: var(--primary-900) 2px 2px 2px;
 
-    & .spacer {
-      height: 40px
+    & .topbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin: 10px;
     }
 
     & .BtnContent {
       display: flex;
       flex-flow: column nowrap;
-      justify-content: space-evenly;
-      height: 160px;
+      height: 100%;
+      justify-content: space-between;
       top: 0;
       bottom: 0;
-      padding: 0 10px 0 10px;
 
       & .InstanceName {
+        margin-left: 15px;
         font-size: 20px;
         overflow: hidden;
       }
@@ -150,7 +189,9 @@ function launchInstanceClick() {
         }
 
         & .StatsText {
+          padding: 0 10px;
           text-align: right;
+          color: var(--gray-400)
         }
       }
     }
@@ -182,6 +223,40 @@ function launchInstanceClick() {
           }
         }
       }
+    }
+  }
+
+  .contextMenu {
+    background-color: red;
+
+    & li {
+      color: var(--gray-900);
+      list-style-type: none;
+      padding: 10px;
+      background-color: var(--gray-200);
+      cursor: pointer;
+      transition: all .5s;
+      font-size: 0.9rem;
+      display: flex;
+      gap: 10px;
+
+      & p {
+        margin: 0;
+      }
+
+      &:hover {
+        background-color: var(--gray-500);
+
+        &:is(.warn) {
+          background-color: #a82a2a;
+        }
+      }
+
+
+    }
+
+    & svg {
+      color: black;
     }
   }
 </style>

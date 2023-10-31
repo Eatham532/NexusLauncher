@@ -6,7 +6,7 @@ mod fs;
 mod config;
 mod processes;
 pub mod services;
-mod handler;
+mod handlers;
 
 use std::collections::VecDeque;
 use std::fs::create_dir_all;
@@ -19,8 +19,8 @@ use piston_lib::data_structures::game::mojang_version_manifest::VersionManifestR
 use crate::config::*;
 use crate::config::instance::{NexusInstance, InstancesToml};
 use crate::processes::auth::{cancel_auth, start_login};
-use crate::processes::instance::{get_versions, install_instance, launch_instance};
-use crate::processes::user::get_pfp_path;
+use crate::processes::instance::{get_versions, install_instance, launch_instance, delete_instance};
+use crate::processes::user::{get_pfp_path, change_active_user, logout_user, pre_download_user_icons};
 use crate::services::install_service::InstallationService;
 
 
@@ -33,11 +33,7 @@ fn greet(name: &str) -> String {
 
 /// Initialize the app
 fn main() {
-    #[cfg(debug_assertions)]
-    export_bindings();
-    /*write_instance_toml(InstancesToml {
-        instance: vec!(NexusInstance::default()),
-    });*/
+    do_pre_work();
 
     let builder = tauri::Builder::default()
         .manage(InstallationService::new())
@@ -50,12 +46,15 @@ fn main() {
             install_instance,
             get_versions,
             launch_instance,
+            delete_instance,
             start_login,
             cancel_auth,
             get_pfp_path,
-            get_users
+            get_users,
+            change_active_user,
+            logout_user,
         ])
-        .setup(|app| {
+        /*.setup(|app| {
             let win = app.get_window("main").unwrap();
             #[cfg(target_os = "macos")]
             {
@@ -66,9 +65,9 @@ fn main() {
             }
 
             Ok(())
-        });
+        })*/;
 
-    #[cfg(target_os = "macos")]
+    /*#[cfg(target_os = "macos")]
     {
         use tauri::WindowEvent;
         builder.on_window_event(|e| {
@@ -78,11 +77,20 @@ fn main() {
                 win.position_traffic_lights(30.0, 30.0);
             }
         });
-    }
+    }*/
 
     builder.run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+
+fn do_pre_work() {
+    pre_download_user_icons();
+
+    #[cfg(debug_assertions)]
+    export_bindings();
+}
+
 
 
 /// Export the tauri-specta bindings
@@ -96,6 +104,7 @@ fn export_bindings() {
         install_instance,
         get_versions,
         launch_instance,
+        delete_instance,
     ], format!("{}/instances.ts", path))
     {
         Ok(_) => println!("Export to instances.ts successful"),
@@ -124,6 +133,8 @@ fn export_bindings() {
     match ts::export(collect_types![
         get_pfp_path,
         get_users,
+        change_active_user,
+        logout_user,
     ], format!("{}/user.ts", path))
     {
         Ok(_) => println!("Export to config.ts successful"),

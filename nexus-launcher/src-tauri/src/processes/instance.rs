@@ -28,3 +28,10 @@ pub async fn launch_instance(instance: NexusInstance) {
     instance.launch().await;
     println!("Done");
 }
+
+#[tauri::command]
+#[specta::specta]
+/// Delete an instance
+pub fn delete_instance(instance: NexusInstance) {
+    instance.delete();
+}

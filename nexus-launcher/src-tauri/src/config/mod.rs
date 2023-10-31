@@ -136,7 +136,7 @@ pub fn get_users() -> UsersJson {
     }
 }
 
-fn write_users_json(config: UsersJson) {
+pub fn write_users_json(config: UsersJson) {
     let p = get_cache_path().join("users.json");
 
     match serde_json::to_string(&config) {
