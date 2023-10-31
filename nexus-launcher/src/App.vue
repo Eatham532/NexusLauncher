@@ -5,7 +5,7 @@
 import {appWindow} from "@tauri-apps/api/window"
 import ProfileButton from "./components/sidebar/ProfileButton.vue";
 import SidebarButton from "./components/sidebar/SidebarButton.vue";
-import {markRaw, ref} from "vue";
+import {markRaw} from "vue";
 import ModalInstall from "./components/popups/ModalInstall.vue";
 import ModalSettings from "./components/popups/ModalSettings.vue";
 import {useModal} from "./composables/useModal.ts";

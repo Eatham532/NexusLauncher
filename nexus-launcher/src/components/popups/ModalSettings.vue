@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
-import SettingsSidebarBtn from "../settings/SettingsSidebarBtn.vue";
 import NButton from "../common/NButton.vue";
-import {Ref, ref, watch} from "vue";
+import {Ref, ref} from "vue";
 import {pick_folder} from "../../scripts/fs.ts";
+/*
 import {animate} from "../../scripts/utils.ts";
+*/
 import {writeAppConfig, AppConfig, getAppConfig} from "../../scripts/rust/config.ts";
 import {ask} from "@tauri-apps/api/dialog";
 
@@ -15,12 +16,15 @@ const config: Ref<AppConfig> = ref({
   metadata_dir: "",
   default_instances_dir: "",
   cache_dir: "",
+  dev_mode: false,
 });
 
 let initialSettings: string;
 
 
+/*
 const selectedBtn = ref('');
+*/
 const showNotice = ref(false);
 
 getAppConfig().then((value) => {
@@ -28,12 +32,12 @@ getAppConfig().then((value) => {
   initialSettings = JSON.stringify(config.value);
 });
 
-function goTo(id: string) {
+/*function goTo(id: string) {
   const element = document.getElementById(id);
   if (element) {
-    /*
+    /!*
         element.scrollIntoView({behavior: "smooth", block: 'nearest', inline: 'start'});
-    */
+    *!/
 
     let parentNode : HTMLDivElement = element.parentNode as HTMLDivElement;
     let targetTop = element.offsetTop - parentNode.offsetTop;
@@ -48,7 +52,7 @@ function goTo(id: string) {
 
   selectedBtn.value = id;
   console.log(selectedBtn.value);
-}
+}*/
 
 /*function scroll() {
   /!*const element = document.getElementById("settingsOptions");

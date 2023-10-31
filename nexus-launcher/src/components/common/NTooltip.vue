@@ -7,7 +7,7 @@
     <!-- </div> -->
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -32,7 +32,8 @@ const tooltipClasses = computed(() => ({
 </script>
 <style scoped>
 .tooltip-wrapper {
-  position: relative;
+  /* TODO: Fix tooltip
+  /*position: relative;*/
   display: inline-block;
 }
 

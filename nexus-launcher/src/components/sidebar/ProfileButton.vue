@@ -56,7 +56,7 @@ listen<AuthPayload>('auth_login', (event) => {
   if (typeof event.payload.stage === 'string') {
     switch (event.payload.stage) {
       case "Complete":
-        reload_component(true)
+        reload_component()
         break;
     }
   }

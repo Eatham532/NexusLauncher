@@ -168,7 +168,11 @@ impl NexusInstance {
         //let mut command = Command::new("C:\\Users\\eatha\\AppData\\Roaming\\com.modrinth.theseus\\meta\\java_versions\\zulu8.72.0.17-ca-jre8.0.382-win_x64\\bin\\javaw.exe");
         let mut command = Command::new("java");
         if let Some(default_args) = version_info.arguments {
-            let args = piston_lib::processes::launcher::args::format_arguments(default_args, mc_args, &jvm_args);
+            let args = piston_lib::processes::launcher::args::format_arguments(default_args, mc_args, &jvm_args, version_info.main_class);
+            command.args(args);
+        }
+        else if let Some(legacy_args) = version_info.minecraft_arguments {
+            let args = piston_lib::processes::launcher::args::format_arguments_legacy(legacy_args, mc_args, &jvm_args, version_info.main_class);
             command.args(args);
         }
         else {

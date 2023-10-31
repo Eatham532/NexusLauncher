@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {Ref, ref} from "vue";
   import NButton from "../common/NButton.vue";
-  import {getVersions, installInstance, Version, VersionManifestRoot} from "../../scripts/rust/instances.ts";
+  import {getVersions, installInstance, Version} from "../../scripts/rust/instances.ts";
   import {pick_folder} from "../../scripts/fs.ts";
 import {ask, message} from "@tauri-apps/api/dialog"
   import {v1 as uuidV1} from "uuid";
