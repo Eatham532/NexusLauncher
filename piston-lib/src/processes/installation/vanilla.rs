@@ -156,5 +156,7 @@ pub fn get_current_native() -> String {
         "android" => panic!("OS not supported"),
         &_ => "natives-linux",
     };
+
+    println!("Got current native: {}, {}", x, env::consts::OS);
     x.to_string()
 }

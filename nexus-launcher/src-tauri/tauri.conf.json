@@ -1,9 +1,9 @@
 {
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "pnpm run dev",
     "beforeBuildCommand": {
       "cwd": "../",
-      "script": "npm run build"
+      "script": "pnpm run build"
     },
     "devPath": "http://localhost:1420",
     "distDir": "../dist",

@@ -304,7 +304,7 @@ pub fn check_rules(rules: Vec<Rule>) -> bool {
         println!("{:?}", rule);
         if let Some(os) = &rule.os {
             println!("OS var exists");
-            if os.name.clone().is_some_and(|os| os.to_string() == env::consts::OS) {
+            if os.name.clone().is_some_and(|os| os.to_string() == get_formatted_os()) {
                 println!("OS match");
                 println!("{:?}", rule.action);
                 allowed = match rule.action {
@@ -321,7 +321,7 @@ pub fn check_rules(rules: Vec<Rule>) -> bool {
                     };
                 }
             }
-            if os.arch.clone().is_some_and(|os| os == env::consts::ARCH) {
+            if os.arch.clone().is_some_and(|arch| arch == env::consts::ARCH) {
                 println!("ARCH match");
                 println!("{:?}", rule.action);
                 allowed = match rule.action {
@@ -355,6 +355,13 @@ pub fn check_rules(rules: Vec<Rule>) -> bool {
     }
     println!("Returning true");
     true
+}
+
+fn get_formatted_os() -> &'static str {
+    match env::consts::OS {
+        "macos" => "osx",
+        o => o,
+    }
 }
 
 fn wrap(group:&String) -> String {

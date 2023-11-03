@@ -1,5 +1,5 @@
 {
-  "dependencies": {
-    "vue-select": "^3.20.2"
+  "devDependencies": {
+    "prettier": "3.0.3"
   }
 }

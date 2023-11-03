@@ -16,6 +16,8 @@ const config: Ref<AppConfig> = ref({
   metadata_dir: "",
   default_instances_dir: "",
   cache_dir: "",
+  java_8_path: "",
+  java_17_path: "",
   dev_mode: false,
 });
 

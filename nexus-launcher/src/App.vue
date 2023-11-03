@@ -13,6 +13,8 @@ import InstanceViewer from "./components/instance_management/InstanceViewer.vue"
 import NButton from "./components/common/NButton.vue";
 import NotificationMenu from "./components/NotificationMenu.vue";
 import ModalAccount from "./components/popups/ModalAccount.vue";
+import ModalOnboarding from "./components/popups/ModalOnboarding.vue";
+import {getAppConfig} from "./scripts/rust/config.ts";
 
 appWindow.theme().then((theme) => {
   if (theme != null) {
@@ -42,6 +44,20 @@ const openAddAcc = () => {
   modal.component.value = markRaw(ModalAccount);
   modal.showModal();
 }
+
+const openOnboarding = () => {
+  console.log("Open");
+  /*modal.component.value = markRaw(ModalOnboarding);
+  modal.showModal();*/
+}
+
+let appSettings;
+getAppConfig().then((value) => {
+  appSettings = value;
+  if (appSettings.java_8_path == "" || appSettings.java_17_path == "") {
+    openOnboarding();
+  }
+});
 
 
 appWindow.show();
