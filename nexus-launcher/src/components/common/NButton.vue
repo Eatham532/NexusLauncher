@@ -41,7 +41,7 @@
   </button>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
   button {
     color: #fff;
     background-color: #0066CC;
@@ -54,6 +54,7 @@
     cursor: pointer;
     border: transparent;
     user-select: none;
+    touch-action: manipulation;
 
     &:hover {
       background-color: #aec5d2;
@@ -100,11 +101,12 @@
     }
   }
 
-  :slotted(svg) {
+  /*:slotted(svg) {
     & path {
       fill: #fff;
+      stroke: #fff;
     }
-  }
+  }*/
 
   button:disabled,
   button[disabled] {
@@ -128,5 +130,12 @@
       color: white!important;
       background-color: #0066cc!important;
     }
+  }
+
+  .square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0!important;
   }
 </style>

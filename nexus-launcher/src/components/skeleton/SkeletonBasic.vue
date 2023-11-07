@@ -8,7 +8,7 @@
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 div {
 
   border-radius: 30px;

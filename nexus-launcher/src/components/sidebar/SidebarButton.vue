@@ -12,7 +12,7 @@ const handleClick = () => {
   </button>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 button {
   display: flex;
   justify-content: center;

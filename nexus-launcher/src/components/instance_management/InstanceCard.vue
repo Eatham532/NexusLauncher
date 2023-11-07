@@ -7,11 +7,10 @@ TODO: FIX SERIALISATION RENAME OF SPECTA
 
 import {NexusInstance, launchInstance, deleteInstance} from "../../scripts/rust/instances.ts";
 import {listen} from "@tauri-apps/api/event";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import NButton from "../common/NButton.vue";
 import NContextMenu from "../common/NContextMenu.vue";
 import {ask, message} from "@tauri-apps/api/dialog";
-import NTooltip from "../common/NTooltip.vue";
 
 const props = defineProps({
   instance: {
@@ -90,35 +89,52 @@ const openContextMenu = (e: any) => {
   contextMenu.value?.open(e);
 };
 
+const btn_hover = ref(false)
+const card_hover = ref(false);
+
+const card_base_hover = computed(() => {
+  if (progress.value === 0) {
+    return false;
+  } else if (progress.value >= 100) {
+    if (btn_hover.value) {
+      return false;
+    } else if (card_hover.value) {
+      return true;
+    }
+  }
+  return false;
+});
+
 </script>
 
 <template>
   <div ref="btn" :class="{
-    root: true,
-    none: progress === 0,
-    installed: progress >= 100,
-  }" @click.self="$emit('click')" @click.right.prevent="openContextMenu">
-    <div class="BtnContent">
-      <div class="topbar">
-        <NTooltip position="top" :text="instance.modloader">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-box"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-        </NTooltip>
+    'root': true,
+    'none': progress === 0,
+    'installed': progress >= 100,
+    'card-base-hover': card_base_hover,
+  }" @click.self="$emit('click')" @click.right.prevent="openContextMenu" @mouseenter="card_hover = true" @mouseleave="card_hover = false">
+    <div class="btn-content">
+      <div class="top-bar">
+
       </div>
-      <div class="InstanceName"><p>{{ instance.name }}</p></div>
+      <div class="instance-name"><p>{{ instance.name }}</p></div>
+
       <div class="bottom-section">
-        <div class="BtnDiv">
-          <NButton class="PlayButton" @click.self="launchInstanceClick" :disabled="progress != 100">
-            <p v-if="progress >= 100">Play</p>
+        <div class="btn-div" @click="launchInstanceClick">
+          <NButton v-if="card_base_hover || btn_hover" square class="play-button" :disabled="progress != 100" @mouseenter="btn_hover = true" @mouseleave="btn_hover = false">
+            <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000" stroke-width="1"><path d="M6.90588 4.53682C6.50592 4.2998 6 4.58808 6 5.05299V18.947C6 19.4119 6.50592 19.7002 6.90588 19.4632L18.629 12.5162C19.0211 12.2838 19.0211 11.7162 18.629 11.4838L6.90588 4.53682Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </NButton>
+          <div></div>
         </div>
-        <div class="StatsText" style="line-height: 5px">
+        <div class="stats-text" style="line-height: 5px">
           <p>{{ instance.modloader }}</p>
           <p>{{ instance.game_version }}</p>
         </div>
       </div>
     </div>
     <NContextMenu ref="contextMenu">
-      <ul class="contextMenu">
+      <ul class="context-menu">
         <li @click="message('That action is still in development')"><p>Manage Instance</p></li>
         <li class="warn" @click="deleteInstanceClick">
 
@@ -129,7 +145,7 @@ const openContextMenu = (e: any) => {
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
   .root {
     flex-flow: column;
     background-color: var(--primary-800);
@@ -138,23 +154,25 @@ const openContextMenu = (e: any) => {
     border-radius: 10px;
     width: 200px;
     box-shadow: var(--primary-900) 2px 2px 2px;
+    user-select: none;
 
-    & .topbar {
+    & .top-bar {
       display: flex;
       justify-content: flex-end;
       align-items: center;
       margin: 10px;
     }
 
-    & .BtnContent {
+    & .btn-content {
       display: flex;
       flex-flow: column nowrap;
       height: 100%;
       justify-content: space-between;
       top: 0;
       bottom: 0;
+      min-width: auto;
 
-      & .InstanceName {
+      & .instance-name {
         margin-left: 15px;
         font-size: 20px;
         overflow: hidden;
@@ -165,13 +183,14 @@ const openContextMenu = (e: any) => {
         justify-content: space-between;
         vertical-align: bottom;
 
-        & .BtnDiv {
+        & .btn-div {
           padding: 10px;
           display: flex;
           flex-flow: column;
           justify-content: end;
 
-          & .PlayButton {
+          & .play-button {
+            position: absolute;
             width: 35px;
             height: 35px;
             aspect-ratio: 1;
@@ -188,45 +207,58 @@ const openContextMenu = (e: any) => {
           }
         }
 
-        & .StatsText {
+        & .stats-text {
+          overflow: clip;
           padding: 0 10px;
           text-align: right;
           color: var(--gray-400)
         }
       }
     }
-
-    &:hover {
-      background-color: var(--primary-700);
-      box-shadow: var(--primary-900) 3px 3px 2px;
-    }
   }
 
+  .card-base-hover:active {
+    transform: scale(0.99);
+    transition-duration: 50ms;
+  }
+
+
   .none {
-    & .BtnContent {
-      & .bottom-section {
-        & .BtnDiv {
-          & .PlayButton {
-            background-color: var(--secondary-100)!important;
-          }
-        }
-      }
+    & .PlayButton {
+      background-color: var(--secondary-100)!important;
     }
   }
 
   .installed {
-    & .BtnContent {
+    & .btn-content {
       & .bottom-section {
-        & .BtnDiv {
-          & .PlayButton {
+        & .btn-div {
+          & .play-button {
             background-color: var(--secondary-800)!important;
           }
+        }
+
+        & .btn-div:hover {
+          transform: scale(1.05);
+          transition: height .5s;
+
+          & > .play-button {
+            transform: scale(1.05);
+            transition-duration: 1s;
+
+            background-color: var(--secondary-600)!important;
+          }
+        }
+
+        & .btn-div:active {
+          transform: scale(0.9);
+          transition: height .5s;
         }
       }
     }
   }
 
-  .contextMenu {
+  .context-menu {
     background-color: red;
 
     & li {
@@ -254,9 +286,7 @@ const openContextMenu = (e: any) => {
 
 
     }
-
-    & svg {
-      color: black;
-    }
   }
+
+
 </style>

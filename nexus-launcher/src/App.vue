@@ -105,8 +105,8 @@ appWindow.setFocus();
 
     <div id="instance-manager">
       <div class="action-bar">
-        <NButton class="action-btn"><img src="https://www.htmlcssbuttongenerator.com/iconExample-search-thin.svg"></NButton>
-        <NButton class="action-btn" >Delete</NButton>
+<!--        <NButton class="action-btn"><img src="https://www.htmlcssbuttongenerator.com/iconExample-search-thin.svg"></NButton>
+        <NButton class="action-btn" >Delete</NButton>-->
 <!--        <NButton class="action-btn" expand use_padding>Delete</NButton>
         <NChip>Hello</NChip>
         <NChip>Hello</NChip>
@@ -115,11 +115,9 @@ appWindow.setFocus();
       <InstanceViewer></InstanceViewer>
     </div>
   </div>
-
-  <NotificationMenu></NotificationMenu>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 :root {
   color: var(--gray-100);
 }
@@ -137,6 +135,9 @@ appWindow.setFocus();
     text-align: center;
     width: 85px;
     margin: 10px;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
 
     & #AccountView {
 
@@ -177,8 +178,9 @@ appWindow.setFocus();
   }
 
   #instance-manager {
-    display: block;
     width: 100%;
+    display: flex;
+    flex-direction: column;
 
     & .action-bar {
       height: 40px;

@@ -14,7 +14,7 @@
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
   div {
     box-shadow: rgba(0,0,0,0.5) 5px 5px;
     position: absolute;

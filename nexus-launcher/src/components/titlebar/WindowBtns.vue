@@ -24,7 +24,7 @@ const showBtns = ref(true);
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 .titlebar-button {
   display: inline-flex;
   justify-content: center;

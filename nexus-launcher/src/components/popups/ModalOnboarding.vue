@@ -105,7 +105,7 @@
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
   .rootDiv {
     background: var(--primary-900);
     top: 0;

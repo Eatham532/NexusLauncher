@@ -6,7 +6,7 @@
   <input type="range">
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 /*********** Baseline, reset styles ***********/
 input[type="range"] {
   -webkit-appearance: none;

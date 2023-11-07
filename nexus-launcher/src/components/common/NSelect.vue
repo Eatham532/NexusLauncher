@@ -20,7 +20,7 @@
   </select>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 .custom-select {
   --border-color: #ccc;
   --background-color: #fff;

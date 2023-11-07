@@ -30,7 +30,7 @@ const tooltipClasses = computed(() => ({
   [`tooltip--${props.position}`]: true
 }))
 </script>
-<style scoped>
+<style lang="stylus" scoped>
 .tooltip-wrapper {
   /* TODO: Fix tooltip
   /*position: relative;*/

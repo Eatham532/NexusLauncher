@@ -92,7 +92,7 @@
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 .titlebar {
   display: flex;
   flex-direction: row;

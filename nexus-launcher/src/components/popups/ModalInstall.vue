@@ -175,7 +175,7 @@ import {readDir} from "@tauri-apps/api/fs";
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
   .rootDiv {
     position: absolute;
     top: 0;

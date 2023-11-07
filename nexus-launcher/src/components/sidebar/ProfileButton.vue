@@ -131,7 +131,7 @@ reload_component();
 
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 :root {
   position: absolute;
   --pfp-image: "/ProfileIconPlaceholder.png";

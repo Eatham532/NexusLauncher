@@ -42,7 +42,7 @@
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 .context-menu {
   border-radius: 0.5rem;
   overflow: hidden;

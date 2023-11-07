@@ -20,7 +20,7 @@ const props = defineProps({
   </div>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
   .chip {
     transition: all 0.3s ease-in-out;
     background-color: #fff;

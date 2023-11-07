@@ -9,12 +9,14 @@ import InstanceCard from "./InstanceCard.vue";
     instances.value = toml.Instance;
     console.log(instances.value);
   });
+
+  const view_type = ref('grid'); // Grid or column
 </script>
 
 <template>
   <Suspense>
     <template #default>
-      <div tabindex="0" class="cards-wrapper">
+      <div v-if="view_type == 'grid'" tabindex="0" class="cards-wrapper">
         <instance-card class="card" v-for="instance in instances" :instance="instance"/>
         <div v-if="!instances.length" style="width: 100%; height: 100%; display: flex; flex-direction: column; text-align: center">
           <h2>THERE ARE NO INSTANCES INSTALLED!</h2>
@@ -32,15 +34,13 @@ import InstanceCard from "./InstanceCard.vue";
   </Suspense>
 </template>
 
-<style scoped>
+<style lang="stylus" scoped>
 .cards-wrapper {
   overflow-y: auto;
   padding: 35px;
-  height: calc(100vh - 160px);
   display: flex;
   flex-flow: row wrap;
   gap: 35px;
-  align-items: flex-start;
 
   & .card {
     height: 200px;
