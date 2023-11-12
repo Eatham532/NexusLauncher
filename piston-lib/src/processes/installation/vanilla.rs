@@ -78,7 +78,7 @@ pub async fn download_libraries(lib_dir: &PathBuf, natives_dir: &PathBuf, librar
     for library in libraries {
         // Check if the rule allows the library to be downloaded
         if library.rules.is_some() {
-            if check_rules(library.rules.unwrap()) == false {
+            if check_rules(&library.rules.unwrap()) == false {
                 continue;
             }
         }
@@ -95,16 +95,14 @@ pub async fn download_libraries(lib_dir: &PathBuf, natives_dir: &PathBuf, librar
             }
 
 
-            // Classifiers are used for old versions
             if download.classifiers.is_some() {
                 let current_native = get_current_native();
 
                 for classifier in download.classifiers {
                     for x in classifier {
                         if x.0 == current_native {
-                            /*println!("Downloading uri...");
                             download_from_uri(&x.1.url, &lib_dir.join(&x.1.path.unwrap()), Some(&x.1.sha1), false).await.expect("TODO: panic message. Classifier");
-*/
+
                             match unzip_from_uri(&x.1.url, natives_dir, Some(&x.1.sha1), false).await
                             {
                                 Ok(()) => {},

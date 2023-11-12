@@ -137,7 +137,7 @@ fn export_bindings() {
         logout_user,
     ], format!("{}/user.ts", path))
     {
-        Ok(_) => println!("Export to config.ts successful"),
+        Ok(_) => println!("Export to user.ts successful"),
         Err(e) => eprintln!("Error during export to user.ts: {:?}", e),
     };
 }

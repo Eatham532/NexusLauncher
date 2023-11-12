@@ -17,7 +17,7 @@ use piston_lib::processes::api::mojang::user::User;
 use piston_lib::processes::installation;
 use piston_lib::processes::installation::{HandleProgress, vanilla};
 use piston_lib::processes::installation::vanilla::get_version_info;
-use piston_lib::processes::launcher::args::get_classpaths;
+use piston_lib::processes::launcher::args::{format_arguments, get_classpaths};
 use crate::config::{add_user, get_app_config, get_appdata_dir_path, get_instances_toml, get_users, write_instance_toml, write_users_json};
 use crate::config::user::NexusUser;
 use crate::handlers::install_progress_handler::InstallProgressHandler;
@@ -148,7 +148,7 @@ impl NexusInstance {
             asset_index_name: version_info.asset_index.id.to_string(),
             game_directory: PathBuf::from(self.path.clone()),
             assets_directory: data_dir.join("assets"),
-            version_type: VersionType::Release.clone(),
+            version_type: version_info.type_,
             resolution: Default::default(),
         };
 
@@ -157,9 +157,8 @@ impl NexusInstance {
         let jvm_args = piston_lib::processes::launcher::args::JvmArgs {
             natives_path: data_dir.join("natives").join(self.game_version.clone()),
             libraries_path: data_dir.join("libraries"),
-            class_paths: format!("\"{}\"", get_classpaths(&version_info.libraries, client_jar_path, data_dir.join("libraries"), "windows")),
+            class_paths: format!("\"{}\"", get_classpaths(&version_info.libraries, client_jar_path, data_dir.join("libraries"))),
             version_name: self.game_version.clone(),
-            java_arch: "windows".to_string(),
         };
 
         std::fs::create_dir_all(self.path.clone()).unwrap();
@@ -167,19 +166,10 @@ impl NexusInstance {
         println!("Creating command");
         //let mut command = Command::new("C:\\Users\\eatha\\AppData\\Roaming\\com.modrinth.theseus\\meta\\java_versions\\zulu8.72.0.17-ca-jre8.0.382-win_x64\\bin\\javaw.exe");
         let mut command = Command::new("java");
-        if let Some(default_args) = version_info.arguments {
-            let args = piston_lib::processes::launcher::args::format_arguments(default_args, mc_args, &jvm_args, version_info.main_class);
-            command.args(args);
-        }
-        else if let Some(legacy_args) = version_info.minecraft_arguments {
-            let args = piston_lib::processes::launcher::args::format_arguments_legacy(legacy_args, mc_args, &jvm_args, version_info.main_class);
-            command.args(args);
-        }
-        else {
-            println!("ERR! No arguments found");
-        }
+        command.args(format_arguments(version_info.arguments, version_info.minecraft_arguments, mc_args, jvm_args, version_info.main_class));
 
         command.current_dir(self.path.clone()).env_remove("_JAVA_OPTIONS");
+
         println!("Command: java {}", command_to_string(&command));
         let result = command.spawn().unwrap();
         println!();
