@@ -32,6 +32,8 @@ const props = defineProps({
     margin-right:6px;
     margin-bottom:6px;
     color: black;
+    user-select none;
+    cursor pointer;
 
     & input {
       display: none;

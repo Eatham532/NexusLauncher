@@ -7,29 +7,25 @@ const handleClick = () => {
 </script>
 
 <template>
-  <button @click="handleClick">
+  <div class="btn" @click="handleClick">
     <slot class="slot"></slot>
-  </button>
+  </div>
 </template>
 
 <style lang="stylus" scoped>
-button {
-  display: flex;
-  justify-content: center;
-  justify-self: center;
-  border: none;
-  background: none;
-  aspect-ratio: 1;
-  border-radius: 20px;
-  margin: 0 10px;
-  align-items: center;
+.btn {
+  display flex;
+  justify-content center;
+  align-items center;
+  aspect-ratio 1;
+  border-radius 20px
 }
 
-button:hover {
-  cursor: pointer;
-  background: rgba(117, 99, 99, 0.3);
-  transition: all 0.5s ease;
-  transform: scale(1.05);
+.btn:hover {
+  cursor pointer;
+  transition all 0.5s ease;
+  transform scale(1.05);
+  box-shadow: 2px 2px 5px 'rgb(from %s r g b / 0.5)' % var(--gray-900);
 }
 
 </style>

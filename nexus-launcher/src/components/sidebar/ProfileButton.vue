@@ -162,7 +162,6 @@ reload_component();
 
 .menu-wrapper {
   width: 200px;
-  height: 200px;
   padding: 0 0 0 30px;
   position: absolute;
   top: 0;

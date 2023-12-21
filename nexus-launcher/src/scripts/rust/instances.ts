@@ -32,10 +32,10 @@ export function installInstance(instance: NexusInstance) {
 }
 
 /**
- * Returns a list of versions from Mojang's version manifest
+ * Returns a list of versions
  */
 export function getVersions() {
-    return invoke()<VersionManifestRoot>("get_versions")
+    return invoke()<PistonMetadata>("get_versions")
 }
 
 /**
@@ -52,10 +52,11 @@ export function deleteInstance(instance: NexusInstance) {
     return invoke()<null>("delete_instance", { instance })
 }
 
-export type Modloader = "Vanilla" | "Fabric" | "Forge" | "Quilt"
+export type Type = "old_alpha" | "old_beta" | "release" | "snapshot"
+export type PistonMetadata = { versions: MVersion[]; modloaders: string[] }
+export type Modloader = "Vanilla" | "Fabric" | "Quilt" | "Forge" | "NeoForge"
+export type LoaderVersion = { id: string; json_url: string; json_sha1: string | null; stable: boolean }
 export type InstanceInstallStage = "Installed" | "Installing" | "Cancelled" | "None"
-export type NexusInstance = { id: string; install_stage: InstanceInstallStage; name: string; game_version: string; modloader: Modloader; loader_version: string | null; path: string }
 export type InstancesToml = { Instance: NexusInstance[] }
-export type Latest = { release: string; snapshot: string }
-export type VersionManifestRoot = { latest: Latest; versions: Version[] }
-export type Version = { id: string; type: string; url: string; time: string; releaseTime: string; sha1: string; complianceLevel: number }
+export type MVersion = { id: string; game_type: Type; json_url: string; json_sha1: string; modloaders: { [key: string]: { [key: string]: LoaderVersion } } }
+export type NexusInstance = { id: string; install_stage: InstanceInstallStage; name: string; game_version: string; modloader: Modloader; loader_version: string | null; path: string }

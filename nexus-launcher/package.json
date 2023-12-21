@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.5.1",
-    "pinia": "^2.1.6",
+    "normalize.css": "^8.0.1",
+    "pinia": "^2.1.7",
     "uuid": "^9.0.1",
     "vue": "^3.3.4"
   },

@@ -36,15 +36,18 @@ import InstanceCard from "./InstanceCard.vue";
 
 <style lang="stylus" scoped>
 .cards-wrapper {
+  scrollbar-gutter: stable;
   overflow-y: auto;
   padding: 35px;
   display: flex;
   flex-flow: row wrap;
-  gap: 35px;
+  gap: 50px;
+  margin-right: 3px;
+  margin-bottom: 3px;
 
   & .card {
-    height: 200px;
-    width: 200px;;
+    height: 190px;
+    width: 190px;
   }
 }
 </style>

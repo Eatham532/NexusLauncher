@@ -61,7 +61,7 @@ listen<ProgressPayload>('game-install-progress', (event) => {
 function launchInstanceClick() {
   console.log("Click")
   if (props.instance != undefined) {
-    if (props.instance.install_stage == "Installed") {
+    if (progress.value >= 100) {
       console.log("Launching Game...")
       launchInstance(props.instance);
     }
@@ -108,35 +108,37 @@ const card_base_hover = computed(() => {
 </script>
 
 <template>
-  <div ref="btn" :class="{
+  <div>
+    <div ref="btn" :class="{
     'root': true,
     'none': progress === 0,
     'installed': progress >= 100,
+    'installing': progress > 0 && progress < 100,
     'card-base-hover': card_base_hover,
   }" @click.self="$emit('click')" @click.right.prevent="openContextMenu" @mouseenter="card_hover = true" @mouseleave="card_hover = false">
-    <div class="btn-content">
-      <div class="top-bar">
+      <div class="btn-content">
+        <div class="top-bar">
 
-      </div>
-      <div class="instance-name"><p>{{ instance.name }}</p></div>
-
-      <div class="bottom-section">
-        <div class="btn-div" @click="launchInstanceClick">
-          <NButton v-if="card_base_hover || btn_hover" square class="play-button" :disabled="progress != 100" @mouseenter="btn_hover = true" @mouseleave="btn_hover = false">
-            <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000" stroke-width="1"><path d="M6.90588 4.53682C6.50592 4.2998 6 4.58808 6 5.05299V18.947C6 19.4119 6.50592 19.7002 6.90588 19.4632L18.629 12.5162C19.0211 12.2838 19.0211 11.7162 18.629 11.4838L6.90588 4.53682Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          </NButton>
-          <div></div>
         </div>
-        <div class="stats-text" style="line-height: 5px">
-          <p>{{ instance.modloader }}</p>
-          <p>{{ instance.game_version }}</p>
+        <div class="instance-name"><p>{{ instance.name }}</p></div>
+
+        <div class="bottom-section">
+          <div class="btn-div">
+            <NButton @click.prevent="launchInstanceClick" v-if="card_base_hover || btn_hover" square class="play-button" :disabled="progress != 100" @mouseenter="btn_hover = true" @mouseleave="btn_hover = false">
+              <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000" stroke-width="1"><path d="M6.90588 4.53682C6.50592 4.2998 6 4.58808 6 5.05299V18.947C6 19.4119 6.50592 19.7002 6.90588 19.4632L18.629 12.5162C19.0211 12.2838 19.0211 11.7162 18.629 11.4838L6.90588 4.53682Z" fill="#000000" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </NButton>
+          </div>
+          <div class="stats-text" style="line-height: 5px">
+            <p>{{ instance.modloader }}</p>
+            <p>{{ instance.game_version }}</p>
+          </div>
         </div>
       </div>
     </div>
     <NContextMenu ref="contextMenu">
       <ul class="context-menu">
-        <li @click="message('That action is still in development')"><p>Manage Instance</p></li>
-        <li class="warn" @click="deleteInstanceClick">
+        <li @click.prevent="message('That action is still in development')"><p>Manage Instance</p></li>
+        <li class="warn" @click.prevent="deleteInstanceClick">
 
           <p>Delete Instance <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></p>
         </li>
@@ -149,12 +151,12 @@ const card_base_hover = computed(() => {
   .root {
     flex-flow: column;
     background-color: var(--primary-800);
-    aspect-ratio: 1;
-    padding: 10px;
     border-radius: 10px;
-    width: 200px;
-    box-shadow: var(--primary-900) 2px 2px 2px;
+    box-shadow: 2px 2px 2px 'rgb(from %s r g b / 0.5)' % var(--primary-900);
     user-select: none;
+    width inherit;
+    height inherit;
+    padding 10px;
 
     & .top-bar {
       display: flex;
@@ -190,7 +192,6 @@ const card_base_hover = computed(() => {
           justify-content: end;
 
           & .play-button {
-            position: absolute;
             width: 35px;
             height: 35px;
             aspect-ratio: 1;
@@ -259,8 +260,6 @@ const card_base_hover = computed(() => {
   }
 
   .context-menu {
-    background-color: red;
-
     & li {
       color: var(--gray-900);
       list-style-type: none;
@@ -286,6 +285,11 @@ const card_base_hover = computed(() => {
 
 
     }
+  }
+
+  .installing {
+    background-color var(--secondary-800);
+    box-shadow: 2px 2px 2px 'rgb(from %s r g b / 0.5)' % var(--secondary-900);
   }
 
 

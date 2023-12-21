@@ -120,6 +120,10 @@
     &:is(.use_padding) {
       padding: 10px 20px!important;
     }
+
+    &:is(:hover) {
+      box-shadow: var(--gray-900) 0px 0px 0px 0px;
+    }
   }
 
   .transparent {

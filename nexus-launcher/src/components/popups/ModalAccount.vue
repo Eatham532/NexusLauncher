@@ -65,7 +65,7 @@
       <div class="modalContent" @click.stop> <!-- A div that contains the content -->
         <div class="titlebar">
           <p>Login with Microsoft</p>
-          <NButton use_padding transparent square @click="close_and_cancel">✖</NButton>
+          <NButton class="closeBtn" transparent @click="close_and_cancel">✖</NButton>
         </div>
 
         <div class="content">
@@ -142,7 +142,7 @@
   border-radius: 20px;
   letter-spacing: 10px;
   padding: min(max(16px, 3vw), 30px) min(max(16px, 4vw), 40px);
-  font-size: min(max(16px, 4vw), 40px);
+  font-size: 2em;
   color: var(--gray-100);
   background: var(--gray-900);
   text-align: center;
@@ -157,4 +157,8 @@
 .NTextbox {
   width: 80%;
 }
+
+  .closeBtn {
+    padding 10px;
+  }
 </style>
