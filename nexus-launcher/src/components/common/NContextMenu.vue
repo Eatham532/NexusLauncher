@@ -44,6 +44,7 @@
 
 <style lang="stylus" scoped>
 .context-menu {
+  user-select none;
   border-radius: 0.5rem;
   overflow: hidden;
   position: fixed;
