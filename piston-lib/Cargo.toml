@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 resolver = "2"
 authors = ["Eatham532 <eatham532@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/Eatham532/NexusLauncher/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -21,3 +23,5 @@ zip = { version = "0.6.6", features = [] }
 minecraft-msa-auth = "0.3.0"
 oauth2 = { version = "4.3.0", default-features = false, features = ["reqwest", "rustls-tls"] }
 dunce = "1.0.4"
+serde-xml-rs = "0.6.0"
+rayon = "1.8.0"

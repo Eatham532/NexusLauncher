@@ -1,5 +1,7 @@
 use tauri::{State, Window};
-use piston_lib::data_structures::game::mojang_version_manifest::VersionManifestRoot;
+use piston_lib::data_structures::game::metadata::piston_version_manifest::PistonMetadata;
+use piston_lib::processes::launcher::installation::versioning::generate_versions_metadata;
+use crate::config::get_cache_path;
 use crate::config::instance::NexusInstance;
 use crate::services::install_service::InstallationService;
 
@@ -15,17 +17,18 @@ pub async fn install_instance<'a>(service: State<'a, InstallationService>, insta
 
 #[tauri::command]
 #[specta::specta]
-/// Returns a list of versions from Mojang's version manifest
-pub async fn get_versions() -> VersionManifestRoot {
-    let versions = piston_lib::processes::installation::vanilla::get_version_manifest().await.unwrap();
-    versions
+/// Returns a list of versions
+pub fn get_versions() -> PistonMetadata {
+    let metadata_path = get_cache_path().join("version_metadata.json");
+    let data = std::fs::read_to_string(metadata_path).unwrap();
+    serde_json::from_str::<PistonMetadata>(data.as_str()).unwrap()
 }
 
 #[tauri::command]
 #[specta::specta]
 /// Launch an instance
-pub async fn launch_instance(instance: NexusInstance) {
-    instance.launch().await;
+pub async fn launch_instance(instance: NexusInstance, window: Window) {
+    instance.launch(window).await;
     println!("Done");
 }
 

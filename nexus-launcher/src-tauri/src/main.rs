@@ -1,12 +1,12 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod macos;
-mod fs;
-mod config;
-mod processes;
+pub mod macos;
+pub mod fs;
+pub mod config;
+pub mod processes;
 pub mod services;
-mod handlers;
+pub mod handlers;
 
 use std::collections::VecDeque;
 use std::fs::create_dir_all;
@@ -15,9 +15,10 @@ use specta::{collect_types};
 use tauri_specta::{ts};
 use tauri::Manager;
 use tauri::RunEvent::WindowEvent;
-use piston_lib::data_structures::game::mojang_version_manifest::VersionManifestRoot;
+use piston_lib::data_structures::game::metadata::mojang_version_manifest::McVersionManifest;
+use piston_lib::data_structures::game::metadata::piston_version_manifest::PistonMetadata;
+use piston_lib::processes::launcher::installation::versioning::generate_versions_metadata;
 use crate::config::*;
-use crate::config::instance::{NexusInstance, InstancesToml};
 use crate::processes::auth::{cancel_auth, start_login};
 use crate::processes::instance::{get_versions, install_instance, launch_instance, delete_instance};
 use crate::processes::user::{get_pfp_path, change_active_user, logout_user, pre_download_user_icons};
@@ -34,6 +35,10 @@ fn greet(name: &str) -> String {
 /// Initialize the app
 fn main() {
     do_pre_work();
+
+    std::thread::spawn(move || {
+        do_startup_work();
+    });
 
     let builder = tauri::Builder::default()
         .manage(InstallationService::new())
@@ -91,6 +96,17 @@ fn do_pre_work() {
     export_bindings();
 }
 
+fn do_startup_work() {
+    // Generate version Metadata
+    println!("Doing startup work");
+    let metadata_path = get_cache_path().join("version_metadata.json");
+    println!("Generating metadata");
+    /*let meta = generate_versions_metadata();
+    let json = serde_json::to_string(&meta).unwrap();
+    std::fs::write(metadata_path, json).unwrap();*/
+    println!("Finished generating metadata");
+}
+
 
 
 /// Export the tauri-specta bindings
@@ -141,4 +157,3 @@ fn export_bindings() {
         Err(e) => eprintln!("Error during export to user.ts: {:?}", e),
     };
 }
-

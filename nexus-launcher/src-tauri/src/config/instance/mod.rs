@@ -3,24 +3,28 @@ mod config;
 use std::cell::Cell;
 use std::collections::VecDeque;
 use std::fs;
-use std::fs::remove_dir_all;
+use std::fs::{canonicalize, remove_dir_all};
+use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::Stdio;
+use std::process::{Command};
 use std::sync::Mutex;
 use specta::{specta, Type};
 use serde::{Deserialize, Serialize};
 use tauri::{Window};
 use uuid::{Uuid, Context};
+use piston_lib::data_structures::game::metadata::piston_version_manifest::PistonMetadata;
 use piston_lib::data_structures::game::modded::Modloader;
 use piston_lib::data_structures::game::version::VersionType;
 use piston_lib::processes::api::mojang::user::User;
-use piston_lib::processes::installation;
-use piston_lib::processes::installation::{HandleProgress, vanilla};
-use piston_lib::processes::installation::vanilla::get_version_info;
+use piston_lib::processes::launcher::installation;
+use piston_lib::processes::launcher::installation::{HandleProgress, vanilla};
+use piston_lib::processes::launcher::installation::vanilla::{get_version_info, get_version_manifest};
 use piston_lib::processes::launcher::args::{format_arguments, get_classpaths};
-use crate::config::{add_user, get_app_config, get_appdata_dir_path, get_instances_toml, get_users, write_instance_toml, write_users_json};
+use crate::config::{add_user, get_app_config, get_appdata_dir_path, get_cache_path, get_instances_toml, get_users, write_instance_toml, write_users_json};
 use crate::config::user::NexusUser;
 use crate::handlers::install_progress_handler::InstallProgressHandler;
+use crate::processes::instance::get_versions;
 
 #[derive(Deserialize, Serialize, Type)]
 pub struct InstancesToml {
@@ -78,15 +82,18 @@ impl NexusInstance {
     pub async fn install(&mut self, window: Window) {
         let progress = InstallProgressHandler::new(window);
 
+        println!("Installing an instance with the following data: {:?}", &self);
+
         self.install_stage = InstanceInstallStage::Installing;
         // 1%
         progress.update_progress(1, &self.id, "Updating Instances Toml");
         self.update_toml();
 
-
+        progress.update_progress(1, &self.id, "Reading metadata");
+        let metadata = serde_json::from_str::<PistonMetadata>(tokio::fs::read_to_string(get_cache_path().join("version_metadata.json")).await.unwrap().as_str()).unwrap();
 
         let data_dir = PathBuf::from(get_app_config().metadata_dir);
-        installation::install(&self.game_version, &self.modloader, &PathBuf::from(&self.path), &data_dir, &progress).await;
+        installation::install(metadata, &self.game_version, &self.modloader,  &self.loader_version, &PathBuf::from(&self.path), &data_dir, &progress).await;
 
         // 99%
         progress.update_progress(99, &self.id, "Updating Instances Toml");
@@ -115,18 +122,19 @@ impl NexusInstance {
                 self.game_version.clone()
             }
             _ => {
-                format!("{}-{}", self.game_version, self.loader_version.clone().unwrap())
+                format!("{}-loader-{}-{}", self.modloader, self.loader_version.as_ref().unwrap(), self.game_version)
             }
         }
     }
     
-    pub async fn launch(&self) {
+    pub async fn launch(&self, window: Window) {
         let config = get_app_config();
         let data_dir = PathBuf::from(&config.metadata_dir);
 
         let versions_dir = PathBuf::from(&config.metadata_dir).join("versions");
+        let id = self.get_parsed_version_str();
 
-        let version_info = get_version_info(&*self.game_version, &versions_dir).await.unwrap();
+        let version_info = get_version_info(&id, &versions_dir).await.unwrap();
         let client_jar_path = versions_dir.join(self.get_parsed_version_str()).join(format!("{}.jar", &self.get_parsed_version_str()));
         println!("Client Jar Path: {:?}", client_jar_path);
 
@@ -135,6 +143,9 @@ impl NexusInstance {
             Some(u) => users.users.get(u).unwrap().to_owned(),
             None => users.users.values().next().unwrap().to_owned(),
         };
+
+        let progress = InstallProgressHandler::new(window);
+        installation::install(get_versions(), &self.game_version, &self.modloader, &self.loader_version, &PathBuf::from(&self.path), &data_dir, &progress).await;
 
         let current_user = &mut_user.clone();
 
@@ -155,10 +166,11 @@ impl NexusInstance {
         println!("Mc args");
 
         let jvm_args = piston_lib::processes::launcher::args::JvmArgs {
-            natives_path: data_dir.join("natives").join(self.game_version.clone()),
+            natives_path: data_dir.join("natives").join(&id),
             libraries_path: data_dir.join("libraries"),
-            class_paths: format!("\"{}\"", get_classpaths(&version_info.libraries, client_jar_path, data_dir.join("libraries"))),
+            class_paths: format!("{}", get_classpaths(&version_info.libraries, client_jar_path, data_dir.join("libraries"))),
             version_name: self.game_version.clone(),
+            log_config_arg: version_info.logging.client.argument.replace("${path}", data_dir.join(format!("assets/log-configs/{}", version_info.logging.client.file.id)).to_str().unwrap()),
         };
 
         std::fs::create_dir_all(self.path.clone()).unwrap();
@@ -166,15 +178,14 @@ impl NexusInstance {
         println!("Creating command");
         //let mut command = Command::new("C:\\Users\\eatha\\AppData\\Roaming\\com.modrinth.theseus\\meta\\java_versions\\zulu8.72.0.17-ca-jre8.0.382-win_x64\\bin\\javaw.exe");
         let mut command = Command::new("java");
+
         command.args(format_arguments(version_info.arguments, version_info.minecraft_arguments, mc_args, jvm_args, version_info.main_class));
 
         command.current_dir(self.path.clone()).env_remove("_JAVA_OPTIONS");
 
-        println!("Command: java {}", command_to_string(&command));
-        let result = command.spawn().unwrap();
-        println!();
-        println!("Result:");
-        println!("{:?}", result);
+        println!("Command: java {:?}", &command);
+        let result = command
+            .spawn().unwrap();
     }
 
     pub fn delete(&self) {

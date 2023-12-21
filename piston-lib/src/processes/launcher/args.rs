@@ -6,6 +6,7 @@ use std::process::Command;
 use crate::data_structures::game::version::Argument::{Normal, Ruled};
 use dunce::canonicalize;
 use serde::{Deserialize, Serialize};
+use tauri::regex::Replacer;
 use crate::data_structures::game::version::{Argument, ArgumentType, ArgumentValue, Library, Rule, RuleAction, VersionType};
 use crate::data_structures::game::version::ArgumentValue::{Many, Single};
 
@@ -32,11 +33,13 @@ pub struct MinecraftArgs {
     pub resolution: WindowSize,
 }
 
-pub struct  JvmArgs {
+#[derive(Clone)]
+pub struct JvmArgs {
     pub natives_path: PathBuf,
     pub libraries_path: PathBuf,
     pub class_paths: String,
     pub version_name: String,
+    pub log_config_arg: String,
 }
 
 
@@ -49,7 +52,9 @@ pub fn format_arguments(arguments: Option<HashMap<ArgumentType, Vec<Argument>>>,
         let mut formatted_args: Vec<String> = Vec::new();
 
         // JVM args
-        formatted_args.append(&mut get_formatted_jvm_arguments(arguments.clone(), jvm_args));
+        formatted_args.append(&mut get_formatted_jvm_arguments(arguments.clone(), jvm_args.clone()));
+
+        formatted_args.push(jvm_args.log_config_arg);
 
         // Main class
         formatted_args.push(main_class);
@@ -165,7 +170,6 @@ fn get_formatted_jvm_arguments(arguments: HashMap<ArgumentType, Vec<Argument>>, 
             }
         }
 
-        println!("Formatted jvm arguments: {:?}", formatted_jvm_args);
         return formatted_jvm_args;
     }
 
@@ -209,13 +213,13 @@ fn parse_jvm_argument(argument: &String, jvm_args: &JvmArgs) -> String {
     let new = argument
         .replace(
             "${natives_directory}",
-            &*wrap(&canonicalize(&jvm_args.natives_path).unwrap()
-                .into_os_string().into_string().unwrap()),
+            &canonicalize(&jvm_args.natives_path).unwrap()
+                .into_os_string().into_string().unwrap(),
         )
         .replace(
             "${library_directory}",
-            &*wrap(&canonicalize(&jvm_args.libraries_path).unwrap()
-                .into_os_string().into_string().unwrap()),
+            &canonicalize(&jvm_args.libraries_path).unwrap()
+                .into_os_string().into_string().unwrap(),
         )
         /*.replace("${classpath_separator}", classpath_separator(env::consts::OS))*/
         .replace("${launcher_name}", "nexus-launcher")
@@ -233,10 +237,11 @@ fn parse_jvm_argument(argument: &String, jvm_args: &JvmArgs) -> String {
 
 
 fn parse_mc_argument(argument: &String, mc_args: &MinecraftArgs) -> String {
-    let new = argument.replace("${accessToken}", &mc_args.access_token)
+    let new = argument
+        .replace("${accessToken}", &mc_args.access_token)
         .replace("${auth_access_token}", &mc_args.access_token)
         .replace("${auth_session}", &mc_args.access_token)
-        .replace("${auth_player_name}", &*wrap(&mc_args.username))
+        .replace("${auth_player_name}", &mc_args.username)
         // TODO: add auth xuid eventually
         .replace("${auth_xuid}", "0")
         .replace("${auth_uuid}", &mc_args.uuid)
@@ -248,18 +253,18 @@ fn parse_mc_argument(argument: &String, mc_args: &MinecraftArgs) -> String {
         .replace("${assets_index_name}", &mc_args.asset_index_name)
         .replace(
             "${game_directory}",
-            wrap(&canonicalize(&mc_args.game_directory).unwrap()
-                .into_os_string().into_string().unwrap()).as_str(),
+            &canonicalize(&mc_args.game_directory).unwrap()
+                .into_os_string().into_string().unwrap(),
         )
         .replace(
             "${assets_root}",
-            wrap(&canonicalize(&mc_args.assets_directory).unwrap()
-                .into_os_string().into_string().unwrap()).as_str(),
+            &canonicalize(&mc_args.assets_directory).unwrap()
+                .into_os_string().into_string().unwrap(),
         )
         .replace(
             "${game_assets}",
-            wrap(&canonicalize(&mc_args.assets_directory).unwrap()
-                .into_os_string().into_string().unwrap()).as_str(),
+            &canonicalize(&mc_args.assets_directory).unwrap()
+                .into_os_string().into_string().unwrap(),
         )
         .replace("${version_type}", &mc_args.version_type.as_str().to_string())
         .replace("${resolution_width}", &mc_args.resolution.0.to_string())
@@ -274,7 +279,7 @@ fn parse_mc_argument(argument: &String, mc_args: &MinecraftArgs) -> String {
 
 
 fn wrap(txt: &String) -> String {
-    format!("{}", txt)
+    format!("\"{}\"", txt)
 }
 
 
@@ -294,25 +299,23 @@ pub fn get_classpaths(
             if check_rules(rules) == false { continue };
         }
 
-        if library.include_in_classpath {
-            let path = get_path_from_artifact(&library.name);
-            match path {
-                Ok(p) => {
-                    let formatted_p = libraries_path.join(p).to_string_lossy().to_string();
-                    println!("-- Adding {} to classpath", &formatted_p);
-                    if !PathBuf::from(&formatted_p).exists() {
-                        println!("Library was not correctly downloaded!: {}.jar", library.name);
-                    }
+        let path = get_path_from_artifact(&library.name);
+        match path {
+            Ok(p) => {
+                let formatted_p = libraries_path.join(p).to_string_lossy().to_string();
+                println!("-- Adding {} to classpath", &formatted_p);
+                if !PathBuf::from(&formatted_p).exists() {
+                    println!("Library was not correctly downloaded!: {}.jar", library.name);
+                }
 
-                    if !class_paths.contains(&formatted_p) {
-                        class_paths.push(formatted_p);
-                    }
-                    else {
-                        println!("Class path matches. But path is already in the list");
-                    }
-                },
-                Err(e) => println!("Could not find library: {}.jar. {:?}", library.name, e),
-            }
+                if !class_paths.contains(&formatted_p) {
+                    class_paths.push(formatted_p);
+                }
+                else {
+                    println!("Class path matches. But path is already in the list");
+                }
+            },
+            Err(e) => println!("Could not find library: {}.jar. {:?}", library.name, e),
         }
     }
 
@@ -324,8 +327,9 @@ pub fn get_classpaths(
     x
 }
 
+
 // Code taken from modrinth's Daedalus
-fn get_path_from_artifact(artifact: &str) -> Result<String, String> {
+pub fn get_path_from_artifact(artifact: &str) -> Result<String, String> {
     let name_items = artifact.split(':').collect::<Vec<&str>>();
     let package = name_items.first().ok_or_else(|| {
         format!("Unable to find package for library {}", &artifact)

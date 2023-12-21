@@ -3,11 +3,12 @@
 
 
 use crate::data_structures::game::version::{
-    Argument, ArgumentType, Library, game_version, VersionType,
+    Argument, ArgumentType, Library, game_version, VersionType
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt;
 use specta::Type;
 
 #[cfg(feature = "bincode")]
@@ -91,78 +92,6 @@ pub struct Processor {
     pub sides: Option<Vec<String>>,
 }
 
-/// Merges a partial version into a complete one
-pub fn merge_partial_version(
-    partial: PartialVersionInfo,
-    merge: game_version,
-) -> game_version {
-    let merge_id = merge.id.clone();
-
-    game_version {
-        arguments: if let Some(partial_args) = partial.arguments {
-            if let Some(merge_args) = merge.arguments {
-                let mut new_map = HashMap::new();
-
-                fn add_keys(
-                    new_map: &mut HashMap<ArgumentType, Vec<Argument>>,
-                    args: HashMap<ArgumentType, Vec<Argument>>,
-                ) {
-                    for (type_, arguments) in args {
-                        for arg in arguments {
-                            if let Some(vec) = new_map.get_mut(&type_) {
-                                vec.push(arg);
-                            } else {
-                                new_map.insert(type_, vec![arg]);
-                            }
-                        }
-                    }
-                }
-
-                add_keys(&mut new_map, merge_args);
-                add_keys(&mut new_map, partial_args);
-
-                Some(new_map)
-            } else {
-                Some(partial_args)
-            }
-        } else {
-            merge.arguments
-        },
-        asset_index: merge.asset_index,
-        assets: merge.assets,
-        downloads: merge.downloads,
-        id: partial.id.replace(DUMMY_REPLACE_STRING, &merge_id),
-        java_version: merge.java_version,
-        libraries: partial
-            .libraries
-            .into_iter()
-            .chain(merge.libraries)
-            .map(|x| Library {
-                downloads: x.downloads,
-                extract: x.extract,
-                name: x.name.replace(DUMMY_REPLACE_STRING, &merge_id),
-                url: x.url,
-                natives: x.natives,
-                rules: x.rules,
-                checksums: x.checksums,
-                include_in_classpath: x.include_in_classpath,
-            })
-            .collect::<Vec<_>>(),
-        main_class: if let Some(main_class) = partial.main_class {
-            main_class
-        } else {
-            merge.main_class
-        },
-        minecraft_arguments: partial.minecraft_arguments,
-        minimum_launcher_version: merge.minimum_launcher_version,
-        release_time: partial.release_time,
-        time: partial.time,
-        type_: partial.type_,
-        data: partial.data,
-        processors: partial.processors,
-    }
-}
-
 #[cfg_attr(feature = "bincode", derive(Encode, Decode))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -196,10 +125,23 @@ pub struct LoaderVersion {
     pub stable: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, Type, Clone)]
+#[derive(Debug, Serialize, Deserialize, Type, Clone, Eq, PartialEq, Hash)]
 pub enum Modloader {
     Vanilla,
     Fabric,
-    Forge,
     Quilt,
+    Forge,
+    NeoForge
+}
+
+impl fmt::Display for Modloader {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Modloader::Vanilla => write!(f, "vanilla"),
+            Modloader::Fabric => write!(f, "fabric"),
+            Modloader::Quilt => write!(f, "quilt"),
+            Modloader::Forge => write!(f, "forge"),
+            Modloader::NeoForge => write!(f, "neoforge"),
+        }
+    }
 }

@@ -3,6 +3,7 @@ use std::io::{Read, Write};
 use tokio::fs::{copy, File};
 use std::path::{PathBuf};
 use bytes::{Buf, Bytes};
+use dunce::canonicalize;
 use reqwest::{Response};
 use tokio::fs;
 use tokio::io::{AsyncWriteExt, BufWriter};
@@ -24,7 +25,6 @@ pub async fn download_from_uri(url: &str, destination: &PathBuf, sha1: Option<&s
     verify_dir(&destination.parent().unwrap().to_path_buf()).await;
 
     println!("Trying to download from {}", url);
-    // Try to download the file up to 4 times
     let mut bytes = read_from_uri(url, sha1).await.unwrap();
 
     fs::write(&destination, bytes.to_vec()).await?;
@@ -34,6 +34,8 @@ pub async fn download_from_uri(url: &str, destination: &PathBuf, sha1: Option<&s
 
 pub async fn read_from_uri(uri:&str, sha1: Option<&str>) -> Result<Bytes, Box<dyn Error>> {
     let client = reqwest::Client::builder().build().unwrap();
+
+    let uri = uri;
 
     for attempt in 1..=4 {
         let result = client.get(uri).send().await;
@@ -49,11 +51,13 @@ pub async fn read_from_uri(uri:&str, sha1: Option<&str>) -> Result<Bytes, Box<dy
                 if let Ok(bytes) = bytes {
                     if let Some(sha1) = sha1 {
                         println!("Verifying hash");
+                        let hash = &*get_hash(bytes.clone()).await.unwrap();
                         if &*get_hash(bytes.clone()).await.unwrap() != sha1 {
                             if attempt <= 3 {
                                 continue;
                             } else {
                                 eprintln!("Download attempt {} failed: Checksum Error", attempt);
+                                eprintln!("The hash {} does not match {}", sha1, hash);
                                 return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "Checksum Error")))
                             }
                         }

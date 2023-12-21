@@ -2661,6 +2661,7 @@ dependencies = [
  "tokio",
  "toml 0.8.6",
  "uuid",
+ "xmltojson",
 ]
 
 [[package]]
@@ -3326,8 +3327,10 @@ dependencies = [
  "dunce",
  "minecraft-msa-auth",
  "oauth2",
+ "rayon",
  "reqwest",
  "serde",
+ "serde-xml-rs",
  "serde_json",
  "sha1 0.6.1",
  "specta",
@@ -3351,7 +3354,7 @@ dependencies = [
  "base64 0.21.5",
  "indexmap 1.9.3",
  "line-wrap",
- "quick-xml",
+ "quick-xml 0.30.0",
  "serde",
  "time",
 ]
@@ -3455,6 +3458,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f6d64c71eb498fe9eae14ce4ec935c555749aef511cca85b5568910d6e48001"
 dependencies = [
  "bytemuck",
+]
+
+[[package]]
+name = "quick-xml"
+version = "0.28.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ce5e73202a820a31f8a0ee32ada5e21029c81fd9e3ebf668a40832e4219d9d1"
+dependencies = [
+ "memchr",
+ "serde",
 ]
 
 [[package]]
@@ -3775,6 +3788,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-playground"
+version = "0.1.0"
+dependencies = [
+ "piston-lib",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "zip",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4005,6 +4030,18 @@ checksum = "f3a1a3341211875ef120e117ea7fd5228530ae7e7036a779fdc9117be6b3282c"
 dependencies = [
  "ordered-float",
  "serde",
+]
+
+[[package]]
+name = "serde-xml-rs"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb3aa78ecda1ebc9ec9847d5d3aba7d618823446a049ba2491940506da6e2782"
+dependencies = [
+ "log",
+ "serde",
+ "thiserror",
+ "xml-rs",
 ]
 
 [[package]]
@@ -6146,6 +6183,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4686009f71ff3e5c4dbcf1a282d0a44db3f021ba69350cd42086b3e5f1c6985"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "xml-rs"
+version = "0.8.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fcb9cbac069e033553e8bb871be2fbdffcab578eb25bd0f7c508cedc6dcd75a"
+
+[[package]]
+name = "xmltojson"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35c6ef73dae3b7a4a94270d84e70e8ac63134d47106a7283450137bee3439bbb"
+dependencies = [
+ "log",
+ "quick-xml 0.28.2",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

@@ -12,8 +12,6 @@ use std::path::PathBuf;
 #[cfg(feature = "bincode")]
 use bincode::{Decode, Encode};
 use crate::data_structures::game::modded::{Processor, SidedDataEntry};
-use crate::processes::installation::{HandleProgress, vanilla};
-use crate::processes::installation::vanilla::{download_asset_objects, download_client_jar, download_libraries};
 use crate::processes::network::{download_from_uri};
 
 #[cfg_attr(feature = "bincode", derive(Encode, Decode))]
@@ -59,6 +57,8 @@ pub struct game_version {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// (Forge-only) The list of processors to run after downloading the files
     pub processors: Option<Vec<Processor>>,
+    /// Logging information
+    pub logging: Logging,
 
 }
 
@@ -300,9 +300,9 @@ pub struct Library {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// SHA1 Checksums for validating the library's integrity. Only present for forge libraries
     pub checksums: Option<Vec<String>>,
-    #[serde(default = "default_include_in_classpath")]
+    /*#[serde(default = "default_include_in_classpath")]
     /// Whether the library should be included in the classpath at the game's launch
-    pub include_in_classpath: bool,
+    pub include_in_classpath: bool,*/
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -381,9 +381,6 @@ pub fn merge_partial_library(
     if let Some(checksums) = partial.checksums {
         merge.checksums = Some(checksums)
     }
-    if let Some(include_in_classpath) = partial.include_in_classpath {
-        merge.include_in_classpath = include_in_classpath
-    }
 
     merge
 }
@@ -430,37 +427,23 @@ pub enum ArgumentType {
     Jvm,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Logging {
+    pub client: Client,
+}
 
-impl game_version {
-    pub async fn install(&self, data_dir: &PathBuf, progress: &dyn HandleProgress) -> Result<(), String>{
-        // Download client.jar
-        let client_jar_path = data_dir.join("versions").join(&self.id).join(format!("{}.jar", &self.id));
-        download_client_jar(&self, &client_jar_path).await;
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Client {
+    pub argument: String,
+    pub file: File,
+    #[serde(rename = "type")]
+    pub logging_type: String,
+}
 
-        // Download asset index
-        println!("Downloading asset index...");
-        let assets_dir = data_dir.join("assets");
-        let asset_index_path = &assets_dir.join("indexes").join(format!("{}.json", self.asset_index.id));
-        let _ = download_from_uri(&self.asset_index.url, asset_index_path, Some(&*self.asset_index.sha1), false).await;
-
-        if asset_index_path.exists() {
-            println!("Downloading assets");
-
-            let contents = read_to_string(asset_index_path).unwrap();
-            let asset_index: vanilla::AssetIndex = serde_json::from_str(&contents).unwrap();
-
-            download_asset_objects(asset_index, &assets_dir).await;
-        }
-        else {
-            return Err("No asset index found!".to_string());
-        }
-
-        // Download libraries
-        let natives_dir = &data_dir.join(format!("natives/{}", &self.id));
-        let library_dir = &data_dir.join("libraries");
-
-        download_libraries(library_dir, natives_dir, (&*self.libraries).to_vec()).await;
-        println!("Finished installation of {}", &self.id);
-        Ok(())
-    }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct File {
+    pub id: String,
+    pub sha1: String,
+    pub size: i64,
+    pub url: String,
 }

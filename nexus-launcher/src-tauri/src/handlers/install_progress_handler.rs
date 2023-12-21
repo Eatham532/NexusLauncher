@@ -1,6 +1,6 @@
 use serde::Serialize;
 use tauri::Window;
-use piston_lib::processes::installation::HandleProgress;
+use piston_lib::processes::launcher::installation::HandleProgress;
 
 #[derive(Clone, Serialize)]
 struct InstallPayload {
