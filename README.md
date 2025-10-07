@@ -4,6 +4,8 @@ A minecraft launcher build using Tauri + VueJs + Ts
 ## [WIP] This project is a work in progress! I am the only one working on this. If you want to join me feel free to contact me on discord `eatingtheham`. 
 ![image](https://github.com/Eatham532/NexusLauncher/assets/78714349/d9f9a2f6-f531-4adf-9817-e40ab844559e)
 
+## NOTE: This project has been postponed due to studies. I will try to start it up again next year!
+
 
 ## My idea
 Yes, there are now many different minecraft launchers to chose from. But each one has their own disadvantages.
