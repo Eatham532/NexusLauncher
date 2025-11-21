@@ -1,0 +1,51 @@
+@import "assets/fonts/REM/REM.css";
+
+:root {
+  font-family: REM, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: #0f0f0f;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  overflow: clip;
+
+  height: 100%;
+  width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #2f2f2f;
+  }
+}
+
+body {
+  margin: 0;
+}
+
+
+
+/* Custom styles */
+.NTextbox {
+  padding: 11px;
+  font-size: 15px;
+  border-width: 0px;
+  border-color: #CCCCCC;
+  background-color: var(--gray-100);
+  color: #000000;
+  border-style: solid;
+  border-radius: 5px;
+  box-shadow: 1px 1px 3px rgba(66,66,66,.75);
+
+  &:focus {
+    outline:none;
+  }
+}
